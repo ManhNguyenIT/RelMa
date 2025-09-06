@@ -5,10 +5,6 @@ public interface ISoftDelete
     DateTimeOffset? DeletedAt { get; set; }
     string? DeletedBy { get; set; }
 
-    void Undo()
-    {
-        IsDeleted = false;
-        DeletedAt = null;
-        DeletedBy = null;
-    }
+    public void Delete();
+    void Undo();
 }

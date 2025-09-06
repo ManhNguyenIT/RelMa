@@ -1,13 +1,18 @@
 ﻿using Asp.Versioning;
+using Cortex.Mediator;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
@@ -20,6 +25,7 @@ using RelMa.Infrastructure.Database;
 using RelMa.Infrastructure.Database.Interceptors;
 using RelMa.Infrastructure.Storage;
 using RelMa.Shared;
+using RelMa.Shared.Events;
 using StackExchange.Redis;
 
 namespace RelMa.Infrastructure;
@@ -31,10 +37,13 @@ public static class DependencyInjection
     {
         services.AddCache(configuration);
         services.AddOpenApi(configuration);
-        services.AddDatabase(configuration);
+
+        services.AddDatabase();
+        services.AddFileStorage(configuration);
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
+        services.AddScoped<IFileService, FileService>();
 
         services.AddAuthentication(configuration);
         services.AddAuthorization(configuration);
@@ -83,14 +92,19 @@ public static class DependencyInjection
             options.Configuration = redisConfig.Configuration;
             options.InstanceName = redisConfig.InstanceName;
         });
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(redisConfig.Configuration)
-        );
+
+        var multiplexer = ConnectionMultiplexer.Connect(redisConfig.Configuration);
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+        services.AddDataProtection()
+            .SetApplicationName(redisConfig.InstanceName)
+            .PersistKeysToStackExchangeRedis(multiplexer, $"{redisConfig.InstanceName}data-protection-keys");
 
         return services;
     }
 
-    internal static IServiceCollection AddOpenApi(this IServiceCollection services,
+    public static IServiceCollection AddOpenApi(
+        this IServiceCollection services,
         IConfiguration configuration)
     {
         var appConfig = configuration.GetRequiredSection(nameof(AppConfig)).Get<AppConfig>()
@@ -118,7 +132,23 @@ public static class DependencyInjection
                 options.SwaggerDoc(version, new OpenApiInfo() { Version = version });
             }
 
+            options.MapType<Ulid>(() => new OpenApiSchema
+            {
+                Type = "string",
+                Format = "ulid"
+            });
+
             options.CustomSchemaIds(type => type.ToString().Replace('+', '.'));
+
+            options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = JwtBearerDefaults.AuthenticationScheme
+            });
+
             options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
             {
                 In = ParameterLocation.Header,
@@ -136,8 +166,29 @@ public static class DependencyInjection
                 },
             });
 
+            options.AddSecurityDefinition("oidc", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Cookie,
+                Type = SecuritySchemeType.ApiKey,
+                Name = CookieAuthenticationDefaults.AuthenticationScheme,
+            });
+
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "bearer"
+                        },
+                        In = ParameterLocation.Header,
+                        Name = JwtBearerDefaults.AuthenticationScheme,
+                        Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    },
+                    authConfig.Scopes
+                },
                 {
                     new OpenApiSecurityScheme
                     {
@@ -150,6 +201,20 @@ public static class DependencyInjection
                         Scheme = JwtBearerDefaults.AuthenticationScheme,
                     },
                     authConfig.Scopes
+                },
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Id = "oidc",
+                            Type = ReferenceType.SecurityScheme,
+                        },
+                        In = ParameterLocation.Cookie,
+                        Name = CookieAuthenticationDefaults.AuthenticationScheme,
+                        Scheme = CookieAuthenticationDefaults.AuthenticationScheme,
+                    },
+                    authConfig.Scopes
                 }
             });
 
@@ -159,20 +224,26 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISaveChangesInterceptor, DomainEventsInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, TenantEntityInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException($"Failed to load DefaultConnection from environment.");
+        services.AddScoped(provider =>
+        {
+            var userContext = provider.GetRequiredService<IUserContext>();
+            var connectionString = userContext.GetConnectionString().GetAwaiter().GetResult();
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+                .AddInterceptors(provider.GetServices<ISaveChangesInterceptor>())
+                .UseSnakeCaseNamingConvention()
+                .EnableSensitiveDataLogging()
+                .LogTo(Console.WriteLine, LogLevel.Information);
 
-        services.AddDbContext<ApplicationDbContext>((sp, options) => options
-            .UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-            .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>())
-            .UseUpperSnakeCaseNamingConvention());
+            return new ApplicationDbContext(optionsBuilder.Options, userContext.TenantId);
+        });
 
         return services;
     }
@@ -184,35 +255,93 @@ public static class DependencyInjection
         var authConfig = configuration.GetRequiredSection(nameof(AuthConfig)).Get<AuthConfig>()
             ?? throw new InvalidOperationException($"Failed to load {nameof(AuthConfig)} from configuration.");
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+        services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = "DefaultScheme";
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddPolicyScheme("DefaultScheme", null, options =>
+        {
+            options.ForwardDefaultSelector = context =>
             {
-                options.RequireHttpsMetadata = false;
-                options.Authority = authConfig.Authority;
-#pragma warning disable CA5404 // Do not disable token validation checks
-                options.TokenValidationParameters = new TokenValidationParameters
+                var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+                if (authHeader?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = false, //Issue: https://github.com/keycloak/keycloak/issues/31023
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                };
-#pragma warning restore CA5404 // Do not disable token validation checks
-            })
-            .AddOpenIdConnect(options =>
-            {
-                options.SaveTokens = true;
-                options.ResponseType = "code";
-                options.RequireHttpsMetadata = false;
-                options.ClientId = authConfig.ClientId;
-                options.Authority = authConfig.Authority;
-                options.GetClaimsFromUserInfoEndpoint = true;
-                options.ClientSecret = authConfig.ClientSecret;
-                foreach (var scope in authConfig.Scopes)
-                {
-                    options.Scope.Add(scope);
+                    return JwtBearerDefaults.AuthenticationScheme;
                 }
-            });
+
+                return CookieAuthenticationDefaults.AuthenticationScheme;
+            };
+        })
+        .AddCookie(options =>
+        {
+            options.SlidingExpiration = true;
+            options.LoginPath = "/auth/login";
+            options.LogoutPath = "/auth/logout";
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.Authority = authConfig.Authority;
+#pragma warning disable CA5404 // Do not disable token validation checks
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = false, //Issue: https://github.com/keycloak/keycloak/issues/31023
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+            };
+#pragma warning restore CA5404 // Do not disable token validation checks
+        })
+        .AddOpenIdConnect(options =>
+        {
+            options.SaveTokens = true;
+            options.ResponseType = "code";
+            options.ResponseMode = "query";
+            options.RequireHttpsMetadata = false;
+            options.ClientId = authConfig.ClientId;
+            options.Authority = authConfig.Authority;
+            options.CallbackPath = "/auth/oidc-callback";
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.ClientSecret = authConfig.ClientSecret;
+
+            options.NonceCookie.SameSite = SameSiteMode.Lax;
+            options.NonceCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+            foreach (var scope in authConfig.Scopes)
+            {
+                options.Scope.Add(scope);
+            }
+
+            options.Events = new OpenIdConnectEvents
+            {
+                OnRedirectToIdentityProvider = context =>
+                {
+                    var request = context.Request;
+
+                    if (request.Headers.TryGetValue("X-Forwarded-Proto", out var proto))
+                        context.ProtocolMessage.RedirectUri = $"{proto}://{request.Host}{request.PathBase}{options.CallbackPath}";
+
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = async context =>
+                {
+                    var accessor = context.HttpContext.RequestServices.GetRequiredService<IHttpContextAccessor>();
+                    if (accessor.HttpContext != null)
+                    {
+                        accessor.HttpContext.User = context.Principal ?? new System.Security.Claims.ClaimsPrincipal();
+                    }
+                    var mediator = context.HttpContext.RequestServices.GetRequiredService<IMediator>();
+                    await mediator.PublishAsync(new UserLoggedInEvent());
+                }
+            };
+        });
 
         return services;
     }

@@ -29,7 +29,7 @@ internal sealed class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
         return context.Database.RollbackTransactionAsync(cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => context.SaveChangesAsync(cancellationToken);
 
     async ValueTask IAsyncDisposable.DisposeAsync()

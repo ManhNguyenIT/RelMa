@@ -15,4 +15,17 @@ public abstract class Entity<TKey> : AggregateRoot, IEntity<TKey>, IAuditable, I
     public bool IsDeleted { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
     public string? DeletedBy { get; set; }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void Undo()
+    {
+        IsDeleted = false;
+        DeletedAt = null;
+        DeletedBy = null;
+    }
 }

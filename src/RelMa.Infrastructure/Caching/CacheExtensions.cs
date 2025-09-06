@@ -51,29 +51,49 @@ public static class DistributedCacheExtensions
     }
 
     public static async Task RemoveCachesAsync(
-        this IDistributedCache cache,
-        IConnectionMultiplexer multiplexer,
-        IOptions<RedisCacheOptions> options,
-        params string[] patterns)
+    this IDistributedCache cache,
+    IConnectionMultiplexer multiplexer,
+    IOptions<RedisCacheOptions> options,
+    string[] patterns,
+    CancellationToken cancellationToken = default)
     {
-        if (patterns == null || patterns.Length == 0)
+        if (patterns == null || patterns.Length == 0 || options?.Value?.InstanceName == null)
             return;
 
+        var database = multiplexer.GetDatabase();
         var endpoints = multiplexer.GetEndPoints();
-        var tasks = endpoints.SelectMany(endpoint =>
+        var instanceName = options.Value.InstanceName;
+
+        var tasks = new List<Task>();
+        foreach (var endpoint in endpoints)
         {
             var server = multiplexer.GetServer(endpoint);
             if (!server.IsConnected || server.IsReplica)
-                return [];
+                continue;
 
-            return patterns.Select(pattern => Task.Run(async () =>
+            foreach (var pattern in patterns)
             {
-                await foreach (var key in server.KeysAsync(pattern: $"{options?.Value?.InstanceName}{pattern}*"))
+                var fullPattern = $"{instanceName}{pattern}*";
+                var batch = database.CreateBatch();
+                var keys = new List<RedisKey>();
+
+                await foreach (var key in server.KeysAsync(pattern: fullPattern).WithCancellation(cancellationToken))
                 {
-                    await cache.RemoveAsync(key.ToString());
+                    keys.Add(key);
                 }
-            }));
-        });
+
+                if (keys.Count > 0)
+                {
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        await Task.WhenAll(keys.Select(k => cache.RemoveAsync(k.ToString(), cancellationToken)));
+
+                        await batch.KeyDeleteAsync([.. keys], CommandFlags.FireAndForget);
+                        batch.Execute();
+                    }, cancellationToken));
+                }
+            }
+        }
 
         await Task.WhenAll(tasks);
     }

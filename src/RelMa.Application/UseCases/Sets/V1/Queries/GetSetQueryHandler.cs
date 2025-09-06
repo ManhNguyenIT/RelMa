@@ -1,0 +1,61 @@
+﻿using Cortex.Mediator.Queries;
+using Microsoft.EntityFrameworkCore;
+using RelMa.Application.Abstractions.Database;
+using RelMa.Application.Extentions;
+using RelMa.Application.UseCases.Sets.V1.Responses;
+using RelMa.Domain.Sets;
+using System.Linq.Dynamic.Core;
+
+namespace RelMa.Application.UseCases.Sets.V1.Queries;
+
+public sealed class GetSetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetSetQuery, PagedResult<SetResponse>>
+{
+    public async Task<PagedResult<SetResponse>> Handle(GetSetQuery request, CancellationToken cancellationToken)
+    {
+        var query = unitOfWork.Repository<SetEntity, Ulid>()
+            .Find(predicate: x => !x.IsDeleted, include: x => x.Include(i => i.Parts).ThenInclude(i => i.Items).ThenInclude(i => i.Location).Include(i => i.Parts).ThenInclude(i => i.Items).ThenInclude(i => i.Material))
+            .Select(x => new SetResponse()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Parts = x.Parts.Select(p => new Parts.V1.Responses.PartResponse()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    PartNumber = p.PartNumber,
+                    Category = p.Category,
+                    Cost = p.Cost,
+                    Description = p.Description,
+                    Image = p.Image,
+                    Quantity = p.Quantity,
+                    Items = p.Items.Select(i => new Items.V1.Responses.ItemResponse()
+                    {
+                        Id = i.Id,
+                        Quantity = i.Quantity,
+                        LocationId = i.LocationId,
+                        MaterialId = i.MaterialId,
+                        Location = i.Location == null ? null : new Locations.V1.Responses.LocationResponse() { Id = i.Location.Id, Name = i.Location.Name },
+                        Material = i.Material == null ? null : new Materials.V1.Responses.MaterialResponse() { Id = i.Material.Id, Name = i.Material.Name }
+                    })
+                })
+            });
+
+        if (request.Includes?.Length > 0)
+            query = query.Includes(request.Includes.Split(','));
+
+        if (request.Filters?.Length > 0)
+            query = query.Where(request.Filters);
+
+        query = request.Orders?.Length > 0
+            ? query.OrderBy(request.Orders)
+            : query.OrderByDescending(o => o.Name);
+
+        if (request.Columns?.Length > 0)
+            query = query.Select(request.Columns.Split(','));
+
+        return await query.ToPagedResultAsync(
+            page: request.Page,
+            pageSize: request.PageSize,
+            cancellationToken: cancellationToken);
+    }
+}

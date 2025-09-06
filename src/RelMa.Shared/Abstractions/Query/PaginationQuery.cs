@@ -2,6 +2,6 @@
 
 public abstract class PaginationQuery : BaseQuery
 {
-    public int? PageNumber { get; set; }
+    public int? Page { get; set; }
     public int? PageSize { get; set; }
 }

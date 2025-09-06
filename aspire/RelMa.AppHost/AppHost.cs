@@ -8,7 +8,7 @@ var cache = builder.AddRedis("cache")
 
 var postgres = builder.AddConnectionString("DefaultConnection");
 
-var keycloak = builder.AddExternalService("keycloak", new Uri("http://localhost:8080"))
+var keycloak = builder.AddExternalService("keycloak", new Uri("http://localhost:8080", UriKind.Absolute))
     .WithReferenceRelationship(postgres);
 
 var apiService = builder.AddProject<Projects.RelMa_ApiService>("apiservice")
@@ -17,7 +17,7 @@ var apiService = builder.AddProject<Projects.RelMa_ApiService>("apiservice")
     .WithReference(keycloak).WaitFor(keycloak)
     .WithHttpHealthCheck("/health");
 
-builder.AddExternalService("webapp", new Uri("http://127.0.0.1:3000"))
+builder.AddExternalService("webapp", new Uri("http://127.0.0.1:3000",UriKind.Absolute))
     .WithReferenceRelationship(keycloak)
     .WithReferenceRelationship(apiService);
 

@@ -70,8 +70,8 @@ sdi
 3. **Restore**: `dotnet restore`
 4. **Migrations (if new)**: 
 ```$env:ASPNETCORE_ENVIRONMENT="Development"
-dotnet ef migrations add InitialCreate --context ApplicationDbContext --project .\RelMa.Infrastructure\ --output-dir Database/Migrations/ --startup-project    .\RelMa.ApiService\
-dotnet ef database update --startup-project .\RelMa.ApiService\
+dotnet ef migrations add InitialCreate --context ApplicationDbContext --project .\RelMa.Infrastructure\ --output-dir Database/Migrations/ --startup-project .\RelMa.ApiService\
+dotnet ef database update --project .\RelMa.Infrastructure\ --startup-project .\RelMa.ApiService\
 ```
 5. **Run**: `dotnet run`
 

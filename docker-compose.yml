@@ -5,70 +5,73 @@ networks:
 volumes:
   minio_data:
   redis_data:
-  postgresql_data:
+  postgres_data:
   
 services:
-  postgresql:
-    container_name: PostgreSQL
-    image: bitnami/postgresql:latest
-    restart: unless-stopped
-    networks:
-      - local-network
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRESQL_USERNAME=admin
-      - POSTGRESQL_PASSWORD=Abc!3579
-      - POSTGRESQL_DATABASE=keycloak
-    volumes:
-      - postgresql_data:/bitnami/postgresql
+  # postgres:
+  #   container_name: PostgreSQL
+  #   image: bitnami/postgresql:latest
+  #   restart: unless-stopped
+  #   networks:
+  #     - local-network
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRESQL_USERNAME=admin
+  #     - POSTGRESQL_PASSWORD=Abc!3579
+  #     - POSTGRESQL_DATABASE=keycloak
+  #   volumes:
+  #     - postgres_data:/bitnami/postgresql
   
-  minio:
-    container_name: MinIO
-    image: bitnami/minio:latest
-    restart: unless-stopped
-    environment:
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD=Abc!3579
-    ports:
-      - "9000:9000"
-    volumes:
-      - minio_data:/bitnami/minio/data 
+  # minio:
+  #   container_name: MinIO
+  #   image: bitnami/minio:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     - MINIO_BROWSER=on
+  #     - MINIO_ROOT_USER=admin
+  #     - MINIO_ROOT_PASSWORD=Abc!3579
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   volumes:
+  #     - minio_data:/bitnami/minio/data 
 
-  redis:
-    container_name: Redis
-    image: bitnami/redis:latest
-    restart: unless-stopped
-    networks:
-      - local-network
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/bitnami/redis
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_PASSWORD=Abc!3579
+  # redis:
+  #   container_name: Redis
+  #   image: bitnami/redis:latest
+  #   restart: unless-stopped
+  #   networks:
+  #     - local-network
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/bitnami/redis
+  #   environment:
+  #     - REDIS_PASSWORD=Abc!3579
   
-  keycloak:
-    container_name: Keycloak
-    image: bitnami/keycloak:latest
-    networks:
-      - local-network
-    tty: true #docker run -t
-    stdin_open: true #docker run -i
-    environment:
-      KEYCLOAK_ADMIN_USER: admin
-      KEYCLOAK_ADMIN_PASSWORD: Abc!3579
-      KEYCLOAK_DATABASE_VENDOR: postgresql
-      KEYCLOAK_DATABASE_HOST: postgresql
-      KEYCLOAK_DATABASE_PORT: 5432
-      KEYCLOAK_DATABASE_NAME: keycloak
-      KEYCLOAK_DATABASE_USER: admin
-      KEYCLOAK_DATABASE_PASSWORD: Abc!3579
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgresql
+  # keycloak:
+  #   container_name: Keycloak
+  #   image: bitnami/keycloak:26.3.1
+  #   networks:
+  #     - local-network
+  #   tty: true #docker run -t
+  #   stdin_open: true #docker run -i
+  #   environment:
+  #     KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  #     KC_BOOTSTRAP_ADMIN_PASSWORD: Abc!3579
+  #     KEYCLOAK_DATABASE_VENDOR: postgresql
+  #     KEYCLOAK_DATABASE_HOST: postgres
+  #     KEYCLOAK_DATABASE_PORT: 5432
+  #     KEYCLOAK_DATABASE_NAME: keycloak
+  #     KEYCLOAK_DATABASE_USER: admin
+  #     KEYCLOAK_DATABASE_PASSWORD: Abc!3579
+  #   extra_hosts:
+  #       - "keycloak.local:192.168.1.10"
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
       
   apiservice:
     container_name: ApiService
@@ -83,12 +86,12 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
     ports:
       - "8081:8080"
-    depends_on:
-      - postgresql
-      - keycloak
-      - redis
+    # depends_on:
+    #   - postgres
+    #   - keycloak
+    #   - redis
 
-  web:
+  webapp:
     container_name: WebApp
     image: ${DOCKER_REGISTRY-}web
     networks:
@@ -100,4 +103,3 @@ services:
       - "3000:80"
     depends_on:
       - apiservice
-      - keycloak

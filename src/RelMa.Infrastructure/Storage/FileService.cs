@@ -1,113 +1,155 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel.Args;
+using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Services;
-using System.Collections.Concurrent;
 using System.IO.Compression;
 
 namespace RelMa.Infrastructure.Storage;
 
-internal sealed class FileService(IMinioClient minioClient, IOptions<FileConfig> options) : IFileService
+internal sealed class FileService(IMinioClient minioClient, IUserContext userContext) : IFileService
 {
     public async Task<IEnumerable<string>> CopyFilesAsync(string folder, string[] files, CancellationToken cancellationToken = default)
     {
         if (files == null || files.Length == 0)
             throw new ArgumentException("No files specified.", nameof(files));
 
-        var fileConfig = options.Value;
+        var fileConfig = await userContext.GetFileConfig()
+            ?? throw new InvalidOperationException($"File config not found.");
 
+        var targetFolder = string.IsNullOrWhiteSpace(folder) ? string.Empty : $"{folder.TrimEnd('/')}/";
+
+        using var semaphore = new SemaphoreSlim(10);
         var tasks = files.Select(async file =>
         {
-            var fileName = file.Replace('/', '_');
-            var objectName = string.IsNullOrWhiteSpace(folder) ? fileName : $"{folder.TrimEnd('/')}/{fileName}";
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var fileName = string.Join('_', file.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+                var objectName = $"{targetFolder}{fileName}";
 
-            var copyArgs = new CopyObjectArgs()
-                .WithBucket(fileConfig.TargetBucket)
-                .WithObject(objectName)
-                .WithCopyObjectSource(new CopySourceObjectArgs()
-                    .WithBucket(fileConfig.TempBucket)
-                    .WithObject(file));
+                var copyArgs = new CopyObjectArgs()
+                    .WithBucket(fileConfig.TargetBucket)
+                    .WithObject(objectName)
+                    .WithCopyObjectSource(new CopySourceObjectArgs()
+                        .WithBucket(fileConfig.TempBucket)
+                        .WithObject(file));
 
-            await minioClient.CopyObjectAsync(copyArgs, cancellationToken);
+                await minioClient.CopyObjectAsync(copyArgs, cancellationToken);
 
-            var statArgs = new StatObjectArgs()
-                .WithBucket(fileConfig.TargetBucket)
-                .WithObject(objectName);
-            var objectStat = await minioClient.StatObjectAsync(statArgs, cancellationToken);
-
-            var removeArgs = new RemoveObjectArgs()
-                .WithBucket(fileConfig.TempBucket)
-                .WithObject(file);
-
-            await minioClient.RemoveObjectAsync(removeArgs, cancellationToken);
-
-            return objectStat.ObjectName;
+                return objectName;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         });
 
-        var results = await Task.WhenAll(tasks);
-        return results;
+        return await Task.WhenAll(tasks);
     }
 
+    public async Task DeleteTempFilesAsync(string[] files, CancellationToken cancellationToken = default)
+    {
+        if (files == null || files.Length == 0)
+            throw new ArgumentException("No files specified.", nameof(files));
+
+        var fileConfig = await userContext.GetFileConfig()
+            ?? throw new InvalidOperationException($"File config not found.");
+
+        using var semaphore = new SemaphoreSlim(10);
+        var tasks = files.Select(async file =>
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var removeArgs = new RemoveObjectArgs()
+                    .WithBucket(fileConfig.TempBucket)
+                    .WithObject(file);
+                await minioClient.RemoveObjectAsync(removeArgs, cancellationToken);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
 
     public async Task<MemoryStream> DownloadFilesAsync(string[] files, CancellationToken cancellationToken = default)
     {
         if (files == null || files.Length == 0)
-            throw new ArgumentException("No files specified.");
+            throw new ArgumentException("No files specified.", nameof(files));
 
-        var fileConfig = options.Value;
+        var fileConfig = await userContext.GetFileConfig()
+            ?? throw new InvalidOperationException($"File config not found.");
+
         if (files.Length == 1)
         {
             var memoryStream = new MemoryStream();
-            await minioClient.GetObjectAsync(new GetObjectArgs()
-                .WithBucket(fileConfig.TargetBucket)
-                .WithObject(files[0])
-                .WithCallbackStream(stream =>
-                {
-                    stream.CopyTo(memoryStream);
-                }), cancellationToken);
-
-            memoryStream.Position = 0;
-            return memoryStream;
-        }
-        else
-        {
-            var zipStream = new MemoryStream();
-
-            var fileStreams = await Task.WhenAll(files.Select(async file =>
+            try
             {
-                var ms = new MemoryStream();
-
                 await minioClient.GetObjectAsync(new GetObjectArgs()
                     .WithBucket(fileConfig.TargetBucket)
-                    .WithObject(file)
-                    .WithCallbackStream(stream =>
+                    .WithObject(files[0])
+                    .WithCallbackStream(async stream =>
                     {
-                        stream.CopyTo(ms);
-                    }));
+                        await stream.CopyToAsync(memoryStream, cancellationToken);
+                    }), cancellationToken);
 
-                ms.Position = 0;
-                return (FileName: Path.GetFileName(file), Stream: ms);
-            }));
-
-            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true);
-            foreach (var (fileName, fileStream) in fileStreams)
+                memoryStream.Position = 0;
+                return memoryStream;
+            }
+            catch
             {
-                var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
+                await memoryStream.DisposeAsync();
+                throw;
+            }
+        }
 
-                await using var entryStream = entry.Open();
-                await fileStream.CopyToAsync(entryStream, cancellationToken);
-                await fileStream.DisposeAsync();
+        var zipStream = new MemoryStream();
+        try
+        {
+            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true);
+            using var semaphore = new SemaphoreSlim(10);
+            foreach (var file in files)
+            {
+                await semaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    var fileName = Path.GetFileName(file);
+                    var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
+
+                    await using var entryStream = entry.Open();
+                    await minioClient.GetObjectAsync(new GetObjectArgs()
+                        .WithBucket(fileConfig.TargetBucket)
+                        .WithObject(file)
+                        .WithCallbackStream(async stream =>
+                        {
+                            await stream.CopyToAsync(entryStream, cancellationToken);
+                        }), cancellationToken);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
             }
 
             zipStream.Position = 0;
             return zipStream;
         }
+        catch
+        {
+            await zipStream.DisposeAsync();
+            throw;
+        }
     }
 
-    public async Task<IEnumerable<string>> GetFilesAsync(string? prefix = null, string[]? extensions = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<string>> GetFilesAsync(string? prefix = null, string? pattern = null, string[]? extensions = null, CancellationToken cancellationToken = default)
     {
-        var fileConfig = options.Value;
+        var fileConfig = await userContext.GetFileConfig()
+            ?? throw new InvalidOperationException($"File config not found.");
+
         var listArgs = new ListObjectsArgs()
             .WithBucket(fileConfig.TargetBucket)
             .WithRecursive(true);
@@ -117,16 +159,20 @@ internal sealed class FileService(IMinioClient minioClient, IOptions<FileConfig>
             listArgs.WithPrefix(prefix.TrimEnd('/') + "/");
         }
 
-        var results = new ConcurrentBag<string>();
+        // Optimize extensions lookup with HashSet
+        var extensionSet = extensions != null && extensions.Length > 0
+            ? new HashSet<string>(extensions.Where(e => !string.IsNullOrEmpty(e)), StringComparer.OrdinalIgnoreCase)
+            : null;
+
+        var results = new List<string>();
         var tcs = new TaskCompletionSource<bool>();
         var observable = minioClient.ListObjectsAsync(listArgs, cancellationToken);
+
         using var subscription = observable.Subscribe(
             item =>
             {
-                if (!item.IsDir)
+                if (!item.IsDir && IsValidFile(item.Key, pattern, extensionSet))
                 {
-                    if (extensions != null && extensions.Length != 0 && !Array.Exists(extensions, ext => item.Key.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                        return;
                     results.Add(item.Key);
                 }
             },
@@ -142,21 +188,17 @@ internal sealed class FileService(IMinioClient minioClient, IOptions<FileConfig>
         return results;
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file, CancellationToken cancellationToken = default)
+    private static bool IsValidFile(string fileKey, string? pattern, HashSet<string>? extensions)
     {
-        var fileConfig = options.Value;
-        var sectionId = Ulid.NewUlid().ToString();
-        await using var stream = file.OpenReadStream();
-        var putArgs = new PutObjectArgs()
-            .WithBucket(fileConfig.TempBucket)
-            .WithObject($"{sectionId}/{file.FileName}")
-            .WithStreamData(stream)
-            .WithObjectSize(file.Length)
-            .WithContentType(file.ContentType);
+        // Check pattern
+        if (!string.IsNullOrEmpty(pattern) && !fileKey.Contains(pattern, StringComparison.OrdinalIgnoreCase))
+            return false;
 
-        var response = await minioClient.PutObjectAsync(putArgs, cancellationToken);
+        // Check extensions
+        if (extensions != null && extensions.Count > 0 && !extensions.Any(ext => fileKey.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+            return false;
 
-        return response.ObjectName;
+        return true;
     }
 
     public async Task<IEnumerable<string>> UploadFilesAsync(IFormFileCollection files, CancellationToken cancellationToken = default)
@@ -164,28 +206,67 @@ internal sealed class FileService(IMinioClient minioClient, IOptions<FileConfig>
         if (files == null || files.Count == 0)
             throw new ArgumentException("No files specified.", nameof(files));
 
-        var fileConfig = options.Value;
-        var sectionId = Ulid.NewUlid().ToString();
+        var fileConfig = await userContext.GetFileConfig()
+            ?? throw new InvalidOperationException($"File config not found.");
 
-        var fileList = files.ToList();
+        var sessionId = Ulid.NewUlid().ToString();
+        using var semaphore = new SemaphoreSlim(10);
 
-        var tasks = fileList.Select(async file =>
+        var tasks = files.Select(async file =>
         {
-            await using var stream = file.OpenReadStream();
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                if (!string.IsNullOrEmpty(fileConfig.MaxFileSize) && file.Length > ParseFileSize(fileConfig.MaxFileSize))
+                    throw new ArgumentException($"File {file.FileName} exceeds size limit.");
 
-            var putArgs = new PutObjectArgs()
-                .WithBucket(fileConfig.TempBucket)
-                .WithObject($"{sectionId}/{file.FileName}")
-                .WithStreamData(stream)
-                .WithObjectSize(file.Length)
-                .WithContentType(file.ContentType);
+                await using var stream = file.OpenReadStream();
+                var fileName = string.Join('_', Path.GetFileName(file.FileName).Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+                var objectName = $"{sessionId}/{fileName}";
 
-            var response = await minioClient.PutObjectAsync(putArgs, cancellationToken);
-            return response.ObjectName;
+                var putArgs = new PutObjectArgs()
+                    .WithBucket(fileConfig.TempBucket)
+                    .WithObject(objectName)
+                    .WithStreamData(stream)
+                    .WithObjectSize(file.Length)
+                    .WithContentType(file.ContentType);
+
+                var response = await minioClient.PutObjectAsync(putArgs, cancellationToken);
+                return response.ObjectName;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         });
 
-        var results = await Task.WhenAll(tasks);
-        return results;
+        return await Task.WhenAll(tasks);
     }
 
+    public long ParseFileSize(string fileSize)
+    {
+        fileSize = fileSize.Trim().ToUpperInvariant();
+
+        var numberPart = new string([.. fileSize.TakeWhile(c => char.IsDigit(c) || c == '.' || c == '-')]);
+        var unitPart = fileSize[numberPart.Length..];
+
+        if (string.IsNullOrEmpty(numberPart) || string.IsNullOrEmpty(unitPart) || !double.TryParse(numberPart, out var size))
+            throw new ArgumentException($"Invalid MaxFileSize format: {fileSize}. Expected format: '10KB', '1MB', '2.5GB'. Supported units: B, KB, MB, GB, TB, PB.");
+
+        var multiplier = unitPart switch
+        {
+            "B" => 1L,
+            "KB" => 1024L,
+            "MB" => 1024L * 1024L,
+            "GB" => 1024L * 1024L * 1024L,
+            "TB" => 1024L * 1024L * 1024L * 1024L,
+            "PB" => 1024L * 1024L * 1024L * 1024L * 1024L,
+            _ => throw new ArgumentException($"Unsupported unit in MaxFileSize: {unitPart}. Supported units: B, KB, MB, GB, TB, PB.")
+        };
+
+        if (size < 0)
+            throw new ArgumentException($"MaxFileSize cannot be negative: {fileSize}.");
+
+        return (long)(size * multiplier);
+    }
 }
