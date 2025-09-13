@@ -8,9 +8,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Assets.V1.Queries;
 
-public sealed class GetAssetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetAssetQuery, PagedResult<AssetResponse>>
+public sealed class GetAssetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetAssetQuery, Shared.PagedResult<AssetResponse>>
 {
-    public async Task<PagedResult<AssetResponse>> Handle(GetAssetQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<AssetResponse>> Handle(GetAssetQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<AssetEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Location).Include(i => i.Manufacturer))

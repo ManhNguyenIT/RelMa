@@ -1,8 +1,6 @@
 ﻿using Cortex.Mediator.Commands;
-using Microsoft.EntityFrameworkCore;
 using RelMa.Application.Abstractions.Database;
 using RelMa.Domain.Tasks;
-using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
+using RelMa.Shared;
 using System.Linq.Expressions;
 
 namespace RelMa.Application.Extentions;
@@ -53,24 +53,23 @@ public static class ExpressionExtensions
     {
         if (page.HasValue && pageSize.HasValue)
         {
-            var pagedResult = query.PageResult(page.Value, pageSize.Value);
-            var dataList = await pagedResult.Queryable.ToListAsync(cancellationToken);
-            return new PagedResult<T>
+            var result = new PagedResult<T>
             {
-                Queryable = dataList.AsQueryable(),
-                RowCount = pagedResult.RowCount,
-                PageSize = pagedResult.PageSize,
-                PageCount = pagedResult.PageCount,
-                CurrentPage = pagedResult.CurrentPage,
+                CurrentPage = page.Value,
+                PageSize = pageSize.Value,
+                RowCount = await query.CountAsync(cancellationToken)
             };
+            result.PageCount = (int)Math.Ceiling((double)result.RowCount / pageSize.Value);
+            result.Items = await query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToArrayAsync(cancellationToken);
+            return result;
         }
         else
         {
-            var dataList = await query.ToListAsync(cancellationToken);
+            var items = await query.ToArrayAsync(cancellationToken);
             return new PagedResult<T>
             {
-                Queryable = dataList.AsQueryable(),
-                RowCount = dataList.Count,
+                Items = items,
+                RowCount = items.Length,
                 PageSize = 1,
                 PageCount = 1,
                 CurrentPage = 1,

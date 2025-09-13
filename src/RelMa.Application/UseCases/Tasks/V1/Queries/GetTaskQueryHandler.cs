@@ -8,9 +8,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Tasks.V1.Queries;
 
-public sealed class GetTaskQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetTaskQuery, PagedResult<TaskResponse>>
+public sealed class GetTaskQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetTaskQuery, Shared.PagedResult<TaskResponse>>
 {
-    public async Task<PagedResult<TaskResponse>> Handle(GetTaskQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<TaskResponse>> Handle(GetTaskQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<TaskEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Asset).ThenInclude(i => i!.Location))

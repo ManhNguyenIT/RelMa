@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using RelMa.Application.Abstractions.Database;
-using System.Linq.Expressions;
 using RelMa.Shared.Abstractions.Entity;
+using System.Linq.Expressions;
 
 namespace RelMa.Infrastructure.Database;
 public sealed class Repository<TEntity, TKey>(ApplicationDbContext context) : IRepository<TEntity, TKey>

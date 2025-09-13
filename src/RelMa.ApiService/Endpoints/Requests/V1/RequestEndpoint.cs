@@ -9,8 +9,8 @@ using RelMa.Application.UseCases.Requests.V1.Commands;
 using RelMa.Application.UseCases.Requests.V1.Queries;
 using RelMa.Application.UseCases.Requests.V1.Responses;
 using RelMa.Infrastructure.Caching;
+using RelMa.Shared;
 using StackExchange.Redis;
-using System.Linq.Dynamic.Core;
 
 namespace RelMa.ApiService.Endpoints.Requests.V1;
 

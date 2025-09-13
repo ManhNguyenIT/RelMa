@@ -55,7 +55,7 @@ public static class DependencyInjection
     }
 
     public static IServiceCollection AddQuartz(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddQuartz(options =>

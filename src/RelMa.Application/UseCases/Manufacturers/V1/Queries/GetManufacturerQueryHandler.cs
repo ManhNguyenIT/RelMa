@@ -7,9 +7,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Manufacturers.V1.Queries;
 
-public sealed class GetManufacturerQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetManufacturerQuery, PagedResult<ManufacturerResponse>>
+public sealed class GetManufacturerQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetManufacturerQuery, Shared.PagedResult<ManufacturerResponse>>
 {
-    public async Task<PagedResult<ManufacturerResponse>> Handle(GetManufacturerQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<ManufacturerResponse>> Handle(GetManufacturerQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<ManufacturerEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)

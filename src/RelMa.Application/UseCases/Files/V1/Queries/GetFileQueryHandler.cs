@@ -7,9 +7,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Files.V1.Queries;
 
-public sealed class GetFileQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetFileQuery, PagedResult<FileResponse>>
+public sealed class GetFileQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetFileQuery, Shared.PagedResult<FileResponse>>
 {
-    public async Task<PagedResult<FileResponse>> Handle(GetFileQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<FileResponse>> Handle(GetFileQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<FileEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)

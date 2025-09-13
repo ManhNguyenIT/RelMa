@@ -7,9 +7,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Locations.V1.Queries;
 
-public sealed class GetLocationQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetLocationQuery, PagedResult<LocationResponse>>
+public sealed class GetLocationQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetLocationQuery, Shared.PagedResult<LocationResponse>>
 {
-    public async Task<PagedResult<LocationResponse>> Handle(GetLocationQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<LocationResponse>> Handle(GetLocationQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<LocationEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)

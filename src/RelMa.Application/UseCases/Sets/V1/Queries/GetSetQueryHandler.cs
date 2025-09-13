@@ -8,9 +8,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Sets.V1.Queries;
 
-public sealed class GetSetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetSetQuery, PagedResult<SetResponse>>
+public sealed class GetSetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetSetQuery, Shared.PagedResult<SetResponse>>
 {
-    public async Task<PagedResult<SetResponse>> Handle(GetSetQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<SetResponse>> Handle(GetSetQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<SetEntity, DefaultIdType>()
             .Find(

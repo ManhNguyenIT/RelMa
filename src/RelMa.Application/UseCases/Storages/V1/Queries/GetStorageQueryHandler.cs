@@ -7,9 +7,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Storages.V1.Queries;
 
-public sealed class GetStorageQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetStorageQuery, PagedResult<StorageResponse>>
+public sealed class GetStorageQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetStorageQuery, Shared.PagedResult<StorageResponse>>
 {
-    public async Task<PagedResult<StorageResponse>> Handle(GetStorageQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<StorageResponse>> Handle(GetStorageQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .Find(predicate: x => !x.IsDeleted)

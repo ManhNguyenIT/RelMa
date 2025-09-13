@@ -1,7 +1,7 @@
-﻿using RelMa.Shared;
-using Cortex.Mediator.Queries;
+﻿using Cortex.Mediator.Queries;
 using FluentValidation;
 using FluentValidation.Results;
+using RelMa.Shared;
 
 namespace RelMa.Application.Behaviors;
 

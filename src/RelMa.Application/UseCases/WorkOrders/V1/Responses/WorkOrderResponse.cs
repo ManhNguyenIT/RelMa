@@ -3,7 +3,6 @@ using RelMa.Application.UseCases.Maintenances.V1.Responses;
 using RelMa.Application.UseCases.Parts.V1.Responses;
 using RelMa.Application.UseCases.Requests.V1.Responses;
 using RelMa.Application.UseCases.Tasks.V1.Responses;
-using RelMa.Domain.Maintenances;
 using RelMa.Domain.WorkOrders;
 
 namespace RelMa.Application.UseCases.WorkOrders.V1.Responses;

@@ -1,5 +1,5 @@
-﻿using RelMa.Shared;
-using RelMa.ApiService.Extensions;
+﻿using RelMa.ApiService.Extensions;
+using RelMa.Shared;
 
 namespace RelMa.ApiService.Extensions;
 
@@ -14,7 +14,7 @@ internal static class ServiceCollectionExtensions
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
         services.AddEndpointsApiExplorer();
-        
+
         return services;
     }
 

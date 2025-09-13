@@ -9,8 +9,8 @@ using RelMa.Application.UseCases.Locations.V1.Commands;
 using RelMa.Application.UseCases.Locations.V1.Queries;
 using RelMa.Application.UseCases.Locations.V1.Responses;
 using RelMa.Infrastructure.Caching;
+using RelMa.Shared;
 using StackExchange.Redis;
-using System.Linq.Dynamic.Core;
 
 namespace RelMa.ApiService.Endpoints.Locations.V1;
 

@@ -9,9 +9,9 @@ using System.Linq.Dynamic.Core;
 namespace RelMa.Application.UseCases.WorkOrders.V1.Queries;
 
 public sealed class GetWorkOrderQueryHandler(
-    IUnitOfWork unitOfWork) : IQueryHandler<GetWorkOrderQuery, PagedResult<WorkOrderResponse>>
+    IUnitOfWork unitOfWork) : IQueryHandler<GetWorkOrderQuery, Shared.PagedResult<WorkOrderResponse>>
 {
-    public async Task<PagedResult<WorkOrderResponse>> Handle(GetWorkOrderQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<WorkOrderResponse>> Handle(GetWorkOrderQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<WorkOrderEntity, DefaultIdType>()
             .Find(

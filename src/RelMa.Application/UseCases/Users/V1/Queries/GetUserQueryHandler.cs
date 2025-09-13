@@ -7,9 +7,9 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.Application.UseCases.Users.V1.Queries;
 
-public sealed class GetUserQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetUserQuery, PagedResult<UserResponse>>
+public sealed class GetUserQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<GetUserQuery, Shared.PagedResult<UserResponse>>
 {
-    public async Task<PagedResult<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<Shared.PagedResult<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<UserEntity, string>()
             .Find(x => !x.IsDeleted)

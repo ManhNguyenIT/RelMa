@@ -1,5 +1,5 @@
-﻿using RelMa.Shared.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using RelMa.Shared.Exceptions;
 using System.Text.Json;
 
 namespace RelMa.ApiService;
