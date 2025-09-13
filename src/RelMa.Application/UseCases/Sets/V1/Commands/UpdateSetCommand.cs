@@ -3,6 +3,6 @@
 namespace RelMa.Application.UseCases.Sets.V1.Commands;
 
 public sealed record UpdateSetCommand(
-    Ulid Id,
+    DefaultIdType Id,
     string Name,
-    Ulid[] Parts) : ICommand<Ulid>;
+    DefaultIdType[] Parts) : ICommand<DefaultIdType>;

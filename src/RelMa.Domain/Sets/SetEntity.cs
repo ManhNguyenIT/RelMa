@@ -3,7 +3,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Sets;
 
-public class SetEntity : Entity<Ulid>
+public class SetEntity : Entity<DefaultIdType>
 {
     public SetEntity()
     {

@@ -9,8 +9,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAutoMapper(typeof(DependencyInjection).Assembly);
-
         services.AddCortexMediator(
             configuration: configuration,
             handlerAssemblyMarkerTypes: [typeof(DependencyInjection)],

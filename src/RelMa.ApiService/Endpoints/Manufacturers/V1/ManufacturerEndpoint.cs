@@ -65,12 +65,12 @@ internal sealed class ManufacturerEndpoint : IEndpoint
         [FromBody] CreateManufacturerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<CreateManufacturerCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<CreateManufacturerCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:manufacturers",
         ];
-        await cache.RemoveCachesAsync(multiplexer, options, patterns);
+        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
     }
 
@@ -83,12 +83,12 @@ internal sealed class ManufacturerEndpoint : IEndpoint
         [FromBody] UpdateManufacturerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<UpdateManufacturerCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<UpdateManufacturerCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:manufacturers",
         ];
-        await cache.RemoveCachesAsync(multiplexer, options, patterns);
+        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
     }
 
@@ -106,7 +106,7 @@ internal sealed class ManufacturerEndpoint : IEndpoint
         [
             $"{userContext.TenantId}:manufacturers",
         ];
-        await cache.RemoveCachesAsync(multiplexer, options, patterns);
+        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
     }
 

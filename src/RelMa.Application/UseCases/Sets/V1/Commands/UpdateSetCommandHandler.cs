@@ -7,25 +7,25 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Sets.V1.Commands;
 
-public class UpdateSetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateSetCommand, Ulid>
+public class UpdateSetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateSetCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(UpdateSetCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(UpdateSetCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<SetEntity, Ulid>()
+        var entity = await unitOfWork.Repository<SetEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Set with Id '{command.Id}' not found");
 
-        if (await unitOfWork.Repository<SetEntity, Ulid>()
+        if (await unitOfWork.Repository<SetEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && x.Id != command.Id && x.Name == command.Name).AnyAsync(cancellationToken))
             throw new ConflictException($"Đã tồn tại Set với tên {command.Name}");
 
         entity.Name = command.Name;
 
         entity.AddParts(
-            await unitOfWork.Repository<PartEntity, Ulid>()
+            await unitOfWork.Repository<PartEntity, DefaultIdType>()
                 .Find(x => !x.IsDeleted && command.Parts.Contains(x.Id)).ToListAsync(cancellationToken));
 
-        unitOfWork.Repository<SetEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<SetEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

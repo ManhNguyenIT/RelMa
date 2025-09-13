@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" />
 		<PackageReference Include="Cortex.Mediator" />
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />

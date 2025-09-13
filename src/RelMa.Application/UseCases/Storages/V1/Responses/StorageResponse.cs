@@ -2,6 +2,6 @@
 
 public class StorageResponse
 {
-    public required Ulid Id { get; set; }
+    public required DefaultIdType Id { get; set; }
     public required string Name { get; set; }
 }

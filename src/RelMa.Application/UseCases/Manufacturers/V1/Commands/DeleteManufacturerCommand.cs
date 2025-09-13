@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Manufacturers.V1.Commands;
 
-public sealed record DeleteManufacturerCommand(Ulid Id) : ICommand<bool>;
+public sealed record DeleteManufacturerCommand(DefaultIdType Id) : ICommand<bool>;

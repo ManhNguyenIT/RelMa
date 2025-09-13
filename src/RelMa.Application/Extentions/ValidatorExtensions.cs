@@ -16,17 +16,17 @@ public static class ValidatorExtensions
             .WithMessage("Tên chứa ký tự không hợp lệ.");
     }
 
-    public static IRuleBuilderOptions<T, Ulid> MustBeValidUlid<T>(this IRuleBuilder<T, Ulid> ruleBuilder)
+    public static IRuleBuilderOptions<T, DefaultIdType> MustBeValidUlid<T>(this IRuleBuilder<T, DefaultIdType> ruleBuilder)
     {
         return ruleBuilder
-            .NotEqual(Ulid.Empty).WithMessage("{PropertyName} không được để trống.")
+            .NotEqual(DefaultIdType.Empty).WithMessage("{PropertyName} không được để trống.")
             .WithMessage("{PropertyName} phải là một ULID hợp lệ.");
     }
 
-    public static IRuleBuilderOptions<T, Ulid?> MustBeValidUlidOrNull<T>(this IRuleBuilder<T, Ulid?> ruleBuilder)
+    public static IRuleBuilderOptions<T, DefaultIdType?> MustBeValidUlidOrNull<T>(this IRuleBuilder<T, DefaultIdType?> ruleBuilder)
     {
         return ruleBuilder
-            .Must(id => id == null || id.Value != Ulid.Empty)
+            .Must(id => id == null || id.Value != DefaultIdType.Empty)
             .WithMessage("{PropertyName} phải là null hoặc một ULID hợp lệ.");
     }
 }

@@ -16,11 +16,11 @@ public class WorkOrderResponse
         Tasks = [];
         Checklists = [];
     }
-    public required Ulid Id { get; set; }
+    public required DefaultIdType Id { get; set; }
     public required Status Status { get; set; }
-    public Ulid? RequestId { get; set; }
+    public DefaultIdType? RequestId { get; set; }
     public virtual RequestResponse? Request { get; set; }
-    public Ulid? MaintenanceId { get; set; }
+    public DefaultIdType? MaintenanceId { get; set; }
     public virtual MaintenanceResponse? Maintenance { get; set; }
     public virtual IEnumerable<PartResponse> Parts { get; set; }
     public virtual IEnumerable<TaskResponse> Tasks { get; set; }

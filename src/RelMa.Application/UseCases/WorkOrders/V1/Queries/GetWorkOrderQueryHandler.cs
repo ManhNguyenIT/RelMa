@@ -13,7 +13,7 @@ public sealed class GetWorkOrderQueryHandler(
 {
     public async Task<PagedResult<WorkOrderResponse>> Handle(GetWorkOrderQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<WorkOrderEntity, Ulid>()
+        var query = unitOfWork.Repository<WorkOrderEntity, DefaultIdType>()
             .Find(
                 predicate: x => !x.IsDeleted,
                 include: x => x.Include(i => i.Checklists)

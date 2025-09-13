@@ -9,12 +9,12 @@ public class DeleteStorageCommandHandler(IUnitOfWork unitOfWork) : ICommandHandl
 {
     public async Task<bool> Handle(DeleteStorageCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<StorageEntity, Ulid>()
+        var entity = await unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Storage with Id '{command.Id}' not found");
 
         entity.Delete();
-        unitOfWork.Repository<StorageEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<StorageEntity, DefaultIdType>().Update(entity);
         return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
     }
 }

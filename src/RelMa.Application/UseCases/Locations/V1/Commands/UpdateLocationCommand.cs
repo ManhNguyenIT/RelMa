@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Locations.V1.Commands;
 
-public sealed record UpdateLocationCommand(Ulid Id, string Name) : ICommand<Ulid>;
+public sealed record UpdateLocationCommand(DefaultIdType Id, string Name) : ICommand<DefaultIdType>;

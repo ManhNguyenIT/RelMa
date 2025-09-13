@@ -7,7 +7,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.WorkOrders;
 
-public class WorkOrderEntity : Entity<Ulid>
+public class WorkOrderEntity : Entity<DefaultIdType>
 {
     public WorkOrderEntity()
     {
@@ -16,8 +16,8 @@ public class WorkOrderEntity : Entity<Ulid>
         Checklists = new HashSet<ChecklistEntity>();
     }
     public required Status Status { get; set; }
-    public Ulid? RequestId { get; set; }
-    public Ulid? MaintenanceId { get; set; }
+    public DefaultIdType? RequestId { get; set; }
+    public DefaultIdType? MaintenanceId { get; set; }
     public virtual RequestEntity? Request { get; set; }
     public virtual MaintenanceEntity? Maintenance { get; set; }
     public virtual ICollection<PartEntity> Parts { get; private set; }

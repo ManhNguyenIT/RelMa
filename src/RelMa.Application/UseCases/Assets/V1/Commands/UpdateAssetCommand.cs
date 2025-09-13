@@ -3,13 +3,13 @@
 namespace RelMa.Application.UseCases.Assets.V1.Commands;
 
 public sealed record UpdateAssetCommand(
-    Ulid Id,
+    DefaultIdType Id,
     string Name,
     string? Description,
     string? Model,
-    Ulid LocationId,
-    Ulid? ManufacturerId,
+    DefaultIdType LocationId,
+    DefaultIdType? ManufacturerId,
     string SerialNumber,
     string? Category,
     string? Area,
-    string? Barcode) : ICommand<Ulid>;
+    string? Barcode) : ICommand<DefaultIdType>;

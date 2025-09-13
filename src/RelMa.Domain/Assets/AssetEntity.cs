@@ -6,7 +6,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Assets;
 
-public class AssetEntity : Entity<Ulid>
+public class AssetEntity : Entity<DefaultIdType>
 {
     public AssetEntity()
     {
@@ -20,8 +20,8 @@ public class AssetEntity : Entity<Ulid>
     public string? Description { get; set; }
     public string? Model { get; set; }
     public string? SerialNumber { get; set; }
-    public required Ulid LocationId { get; set; }
-    public Ulid? ManufacturerId { get; set; }
+    public required DefaultIdType LocationId { get; set; }
+    public DefaultIdType? ManufacturerId { get; set; }
 
     public virtual LocationEntity? Location { get; set; }
     public virtual ManufacturerEntity? Manufacturer { get; set; }

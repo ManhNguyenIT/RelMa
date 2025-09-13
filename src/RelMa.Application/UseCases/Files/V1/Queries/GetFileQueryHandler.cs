@@ -11,7 +11,7 @@ public sealed class GetFileQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<
 {
     public async Task<PagedResult<FileResponse>> Handle(GetFileQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<FileEntity, Ulid>()
+        var query = unitOfWork.Repository<FileEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)
             .Select(x => new FileResponse()
             {

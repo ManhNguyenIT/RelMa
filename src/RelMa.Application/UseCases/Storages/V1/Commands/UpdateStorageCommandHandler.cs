@@ -6,21 +6,21 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Storages.V1.Commands;
 
-public class UpdateStorageCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateStorageCommand, Ulid>
+public class UpdateStorageCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateStorageCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(UpdateStorageCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(UpdateStorageCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<StorageEntity, Ulid>()
+        var entity = await unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Storage with Id '{command.Id}' not found");
 
-        if (await unitOfWork.Repository<StorageEntity, Ulid>()
+        if (await unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && x.Id != command.Id && x.Name == command.Name).AnyAsync(cancellationToken))
             throw new ConflictException($"Đã tồn tại Storage với tên {command.Name}");
 
         entity.Name = command.Name;
 
-        unitOfWork.Repository<StorageEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<StorageEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

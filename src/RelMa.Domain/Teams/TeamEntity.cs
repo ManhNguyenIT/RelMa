@@ -3,7 +3,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Teams;
 
-public class TeamEntity : Entity<Ulid>
+public class TeamEntity : Entity<DefaultIdType>
 {
     public TeamEntity()
     {

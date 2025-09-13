@@ -12,7 +12,7 @@ public sealed class GetRequestQueryHandler(IUnitOfWork unitOfWork) : IQueryHandl
 {
     public async Task<PagedResult<RequestResponse>> Handle(GetRequestQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<RequestEntity, Ulid>()
+        var query = unitOfWork.Repository<RequestEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Asset).ThenInclude(i => i!.Location))
             .Select(x => new RequestResponse()
             {

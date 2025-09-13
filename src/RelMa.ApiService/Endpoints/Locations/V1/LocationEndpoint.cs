@@ -65,7 +65,7 @@ internal sealed class LocationEndpoint : IEndpoint
         [FromBody] CreateLocationCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<CreateLocationCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<CreateLocationCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:locations",
@@ -83,7 +83,7 @@ internal sealed class LocationEndpoint : IEndpoint
         [FromBody] UpdateLocationCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<UpdateLocationCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<UpdateLocationCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:locations",

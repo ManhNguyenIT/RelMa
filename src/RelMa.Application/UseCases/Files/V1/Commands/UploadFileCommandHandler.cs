@@ -7,11 +7,11 @@ namespace RelMa.Application.UseCases.Files.V1.Commands;
 
 public class UploadFileCommandHandler(
     IUnitOfWork unitOfWork,
-    IFileService fileService) : ICommandHandler<UploadFileCommand, IEnumerable<Ulid>>
+    IFileService fileService) : ICommandHandler<UploadFileCommand, IEnumerable<DefaultIdType>>
 {
-    public async Task<IEnumerable<Ulid>> Handle(UploadFileCommand command, CancellationToken cancellationToken)
+    public async Task<IEnumerable<DefaultIdType>> Handle(UploadFileCommand command, CancellationToken cancellationToken)
     {
-        var result = new List<Ulid>();
+        var result = new List<DefaultIdType>();
 
         var objectIds = await fileService.UploadFilesAsync(command.Files, cancellationToken);
         if (objectIds is null)
@@ -25,7 +25,7 @@ public class UploadFileCommandHandler(
 
             var entity = new FileEntity
             {
-                Id = Ulid.NewUlid(),
+                Id = DefaultIdType.CreateVersion7(),
                 Name = file.FileName,
                 Ext = Path.GetExtension(file.FileName),
                 Size = file.Length,
@@ -36,7 +36,7 @@ public class UploadFileCommandHandler(
 
         foreach (var entity in entities)
         {
-            unitOfWork.Repository<FileEntity, Ulid>().Add(entity);
+            unitOfWork.Repository<FileEntity, DefaultIdType>().Add(entity);
             result.Add(entity.Id);
         }
 

@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
 public sealed record UpdateTaskCommand(
-    Ulid Id,
-    Ulid AssetId,
+    DefaultIdType Id,
+    DefaultIdType AssetId,
     TaskType Type,
-    JsonDocument Value) : ICommand<Ulid>;
+    JsonDocument Value) : ICommand<DefaultIdType>;

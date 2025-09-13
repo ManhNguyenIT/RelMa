@@ -209,7 +209,7 @@ internal sealed class FileService(IMinioClient minioClient, IUserContext userCon
         var fileConfig = await userContext.GetFileConfig()
             ?? throw new InvalidOperationException($"File config not found.");
 
-        var sessionId = Ulid.NewUlid().ToString();
+        var sessionId = DefaultIdType.CreateVersion7().ToString();
         using var semaphore = new SemaphoreSlim(10);
 
         var tasks = files.Select(async file =>

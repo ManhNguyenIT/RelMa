@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
-public sealed record DeleteTaskCommand(Ulid Id) : ICommand<bool>;
+public sealed record DeleteTaskCommand(DefaultIdType Id) : ICommand<bool>;

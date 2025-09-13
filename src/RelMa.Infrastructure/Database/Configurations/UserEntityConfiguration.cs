@@ -10,6 +10,9 @@ internal sealed class UserEntityConfiguration : IEntityTypeConfiguration<UserEnt
     {
         builder.HasKey(t => t.Id);
 
+        builder.Property(t => t.Id)
+            .ValueGeneratedNever();
+
         builder.Property(t => t.TenantId)
             .HasMaxLength(36);
     }

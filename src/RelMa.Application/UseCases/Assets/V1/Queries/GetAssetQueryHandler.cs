@@ -12,7 +12,7 @@ public sealed class GetAssetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler
 {
     public async Task<PagedResult<AssetResponse>> Handle(GetAssetQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<AssetEntity, Ulid>()
+        var query = unitOfWork.Repository<AssetEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Location).Include(i => i.Manufacturer))
             .Select(x => new AssetResponse()
             {

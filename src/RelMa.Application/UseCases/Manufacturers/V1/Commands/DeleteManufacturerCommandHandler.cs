@@ -9,12 +9,12 @@ public class DeleteManufacturerCommandHandler(IUnitOfWork unitOfWork) : ICommand
 {
     public async Task<bool> Handle(DeleteManufacturerCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<ManufacturerEntity, Ulid>()
+        var entity = await unitOfWork.Repository<ManufacturerEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Manufacturer with Id '{command.Id}' not found");
 
         entity.Delete();
-        unitOfWork.Repository<ManufacturerEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<ManufacturerEntity, DefaultIdType>().Update(entity);
         return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
     }
 }

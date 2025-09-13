@@ -8,7 +8,7 @@ public class SetResponse
     {
         Parts = [];
     }
-    public required Ulid Id { get; set; }
+    public required DefaultIdType Id { get; set; }
     public required string Name { get; set; }
     public virtual IEnumerable<PartResponse> Parts { get; set; }
 }

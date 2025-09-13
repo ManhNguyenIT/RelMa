@@ -12,7 +12,7 @@ public sealed class GetTaskQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<
 {
     public async Task<PagedResult<TaskResponse>> Handle(GetTaskQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<TaskEntity, Ulid>()
+        var query = unitOfWork.Repository<TaskEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Asset).ThenInclude(i => i!.Location))
             .Select(x => new TaskResponse()
             {

@@ -2,5 +2,5 @@
 
 public class ChecklistResponse
 {
-    public required Ulid Id { get; set; }
+    public required DefaultIdType Id { get; set; }
 }

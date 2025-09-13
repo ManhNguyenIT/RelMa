@@ -2,8 +2,8 @@
 
 public class LocationResponse
 {
-    public required Ulid Id { get; set; }
+    public required DefaultIdType Id { get; set; }
     public required string Name { get; set; }
-    public Ulid? ParentId { get; set; }
+    public DefaultIdType? ParentId { get; set; }
     public virtual LocationResponse? Parent { get; set; }
 }

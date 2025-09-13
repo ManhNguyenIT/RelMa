@@ -11,6 +11,9 @@ internal sealed class TeamEntityConfiguration : IEntityTypeConfiguration<TeamEnt
     {
         builder.HasKey(t => t.Id);
 
+        builder.Property(t => t.Id)
+            .ValueGeneratedNever();
+
         builder.Property(t => t.TenantId)
             .HasMaxLength(36);
 

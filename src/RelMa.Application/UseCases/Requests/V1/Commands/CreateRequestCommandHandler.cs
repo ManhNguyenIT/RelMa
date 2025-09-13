@@ -4,13 +4,13 @@ using RelMa.Domain.Requests;
 
 namespace RelMa.Application.UseCases.Requests.V1.Commands;
 
-public sealed class CreateRequestCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateRequestCommand, Ulid>
+public sealed class CreateRequestCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateRequestCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(CreateRequestCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(CreateRequestCommand command, CancellationToken cancellationToken)
     {
         var entity = new RequestEntity()
         {
-            Id = Ulid.NewUlid(),
+            Id = DefaultIdType.CreateVersion7(),
             AssetId = command.AssetId,
             Description = command.Description,
             Priority = command.Priority,
@@ -19,7 +19,7 @@ public sealed class CreateRequestCommandHandler(IUnitOfWork unitOfWork) : IComma
             Image = command.Image,
         };
 
-        unitOfWork.Repository<RequestEntity, Ulid>().Add(entity);
+        unitOfWork.Repository<RequestEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

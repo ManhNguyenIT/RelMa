@@ -9,12 +9,12 @@ public class DeleteLocationCommandHandler(IUnitOfWork unitOfWork) : ICommandHand
 {
     public async Task<bool> Handle(DeleteLocationCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<LocationEntity, Ulid>()
+        var entity = await unitOfWork.Repository<LocationEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Location with Id '{command.Id}' not found");
 
         entity.Delete();
-        unitOfWork.Repository<LocationEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<LocationEntity, DefaultIdType>().Update(entity);
         return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
     }
 }

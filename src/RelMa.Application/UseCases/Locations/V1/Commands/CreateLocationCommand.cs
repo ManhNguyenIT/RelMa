@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Locations.V1.Commands;
 
-public sealed record CreateLocationCommand(string Name) : ICommand<Ulid>;
+public sealed record CreateLocationCommand(string Name) : ICommand<DefaultIdType>;

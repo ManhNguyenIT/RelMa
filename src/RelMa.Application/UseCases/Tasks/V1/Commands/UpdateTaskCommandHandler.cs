@@ -6,11 +6,11 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
-public class UpdateTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateTaskCommand, Ulid>
+public class UpdateTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<UpdateTaskCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(UpdateTaskCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(UpdateTaskCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<TaskEntity, Ulid>()
+        var entity = await unitOfWork.Repository<TaskEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Task with Id '{command.Id}' not found");
 
@@ -18,7 +18,7 @@ public class UpdateTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<
         entity.Type = command.Type;
         entity.Value = command.Value;
 
-        unitOfWork.Repository<TaskEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<TaskEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

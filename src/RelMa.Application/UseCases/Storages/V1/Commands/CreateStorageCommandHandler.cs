@@ -6,21 +6,21 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Storages.V1.Commands;
 
-public sealed class CreateStorageCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateStorageCommand, Ulid>
+public sealed class CreateStorageCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateStorageCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(CreateStorageCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(CreateStorageCommand command, CancellationToken cancellationToken)
     {
-        if (await unitOfWork.Repository<StorageEntity, Ulid>()
+        if (await unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && x.Name == command.Name).AnyAsync(cancellationToken))
             throw new ConflictException($"Đã tồn tại Storage với tên {command.Name}");
 
         var entity = new StorageEntity()
         {
-            Id = Ulid.NewUlid(),
+            Id = DefaultIdType.CreateVersion7(),
             Name = command.Name,
         };
 
-        unitOfWork.Repository<StorageEntity, Ulid>().Add(entity);
+        unitOfWork.Repository<StorageEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

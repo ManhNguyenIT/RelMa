@@ -9,7 +9,7 @@ public sealed class DeleteFileCommandHandler(IUnitOfWork unitOfWork) : ICommandH
 {
     public async Task<bool> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
     {
-        var entities = await unitOfWork.Repository<FileEntity, Ulid>()
+        var entities = await unitOfWork.Repository<FileEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && command.Ids.Contains(x.Id))
             .ToListAsync(cancellationToken);
 

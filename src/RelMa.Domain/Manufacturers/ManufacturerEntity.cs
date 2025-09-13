@@ -3,7 +3,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Manufacturers;
 
-public class ManufacturerEntity : Entity<Ulid>
+public class ManufacturerEntity : Entity<DefaultIdType>
 {
     public ManufacturerEntity()
     {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
-using RelMa.Infrastructure.Converters;
 using StackExchange.Redis;
 using System.Text.Json;
 
@@ -9,11 +8,6 @@ namespace RelMa.Infrastructure.Caching;
 
 public static class DistributedCacheExtensions
 {
-    private static readonly JsonSerializerOptions _options = new()
-    {
-        Converters = { new PagedResultJsonConverterFactory() }
-    };
-
     public static async Task<T?> GetOrCreateAsync<T>(
         this IDistributedCache cache,
         string key,
@@ -29,7 +23,7 @@ public static class DistributedCacheExtensions
         var json = await cache.GetStringAsync(key, cancellationToken);
         if (!string.IsNullOrWhiteSpace(json))
         {
-            return JsonSerializer.Deserialize<T>(json, _options);
+            return JsonSerializer.Deserialize<T>(json);
         }
 
         var result = await factory(cancellationToken);
@@ -38,7 +32,7 @@ public static class DistributedCacheExtensions
         {
             await cache.SetStringAsync(
                 key,
-                JsonSerializer.Serialize(result, _options),
+                JsonSerializer.Serialize(result),
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow

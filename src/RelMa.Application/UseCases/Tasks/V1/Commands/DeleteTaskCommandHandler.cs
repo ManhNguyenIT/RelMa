@@ -9,12 +9,12 @@ public class DeleteTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<
 {
     public async Task<bool> Handle(DeleteTaskCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<TaskEntity, Ulid>()
+        var entity = await unitOfWork.Repository<TaskEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Task with Id '{command.Id}' not found");
 
         entity.Delete();
-        unitOfWork.Repository<TaskEntity, Ulid>().Update(entity);
+        unitOfWork.Repository<TaskEntity, DefaultIdType>().Update(entity);
         return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
     }
 }

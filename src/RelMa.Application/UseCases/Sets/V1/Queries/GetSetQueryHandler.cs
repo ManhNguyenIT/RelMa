@@ -12,33 +12,36 @@ public sealed class GetSetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<G
 {
     public async Task<PagedResult<SetResponse>> Handle(GetSetQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<SetEntity, Ulid>()
-            .Find(predicate: x => !x.IsDeleted, include: x => x.Include(i => i.Parts).ThenInclude(i => i.Items).ThenInclude(i => i.Location).Include(i => i.Parts).ThenInclude(i => i.Items).ThenInclude(i => i.Material))
-            .Select(x => new SetResponse()
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Parts = x.Parts.Select(p => new Parts.V1.Responses.PartResponse()
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    PartNumber = p.PartNumber,
-                    Category = p.Category,
-                    Cost = p.Cost,
-                    Description = p.Description,
-                    Image = p.Image,
-                    Quantity = p.Quantity,
-                    Items = p.Items.Select(i => new Items.V1.Responses.ItemResponse()
+        var query = unitOfWork.Repository<SetEntity, DefaultIdType>()
+            .Find(
+                predicate: x => !x.IsDeleted,
+                include: x => x.Include(i => i.Parts)
+                                .ThenInclude(i => i.Location)
+                                .Include(i => i.Parts)
+                                .ThenInclude(i => i.Material))
+                    .Select(x => new SetResponse()
                     {
-                        Id = i.Id,
-                        Quantity = i.Quantity,
-                        LocationId = i.LocationId,
-                        MaterialId = i.MaterialId,
-                        Location = i.Location == null ? null : new Locations.V1.Responses.LocationResponse() { Id = i.Location.Id, Name = i.Location.Name },
-                        Material = i.Material == null ? null : new Materials.V1.Responses.MaterialResponse() { Id = i.Material.Id, Name = i.Material.Name }
-                    })
-                })
-            });
+                        Id = x.Id,
+                        Name = x.Name,
+                        Parts = x.Parts
+                            .Select(p => new Parts.V1.Responses.PartResponse()
+                            {
+                                Id = p.Id,
+                                Quantity = p.Quantity,
+                                LocationId = p.LocationId,
+                                MaterialId = p.MaterialId,
+                                Location = p.Location == null || p.Location.IsDeleted ? null : new Locations.V1.Responses.LocationResponse()
+                                {
+                                    Id = p.Location.Id,
+                                    Name = p.Location.Name
+                                },
+                                Material = p.Material == null || p.Material.IsDeleted ? null : new Materials.V1.Responses.MaterialResponse()
+                                {
+                                    Id = p.Material.Id,
+                                    Name = p.Material.Name
+                                }
+                            })
+                    });
 
         if (request.Includes?.Length > 0)
             query = query.Includes(request.Includes.Split(','));

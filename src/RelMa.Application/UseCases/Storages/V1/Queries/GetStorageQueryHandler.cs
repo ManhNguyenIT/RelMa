@@ -11,7 +11,7 @@ public sealed class GetStorageQueryHandler(IUnitOfWork unitOfWork) : IQueryHandl
 {
     public async Task<PagedResult<StorageResponse>> Handle(GetStorageQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<StorageEntity, Ulid>()
+        var query = unitOfWork.Repository<StorageEntity, DefaultIdType>()
             .Find(predicate: x => !x.IsDeleted)
             .Select(x => new StorageResponse()
             {

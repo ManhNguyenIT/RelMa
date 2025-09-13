@@ -6,18 +6,18 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
-public sealed class CreateTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateTaskCommand, Ulid>
+public sealed class CreateTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateTaskCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(CreateTaskCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(CreateTaskCommand command, CancellationToken cancellationToken)
     {
         var entity = new TaskEntity()
         {
-            Id = Ulid.NewUlid(),
+            Id = DefaultIdType.CreateVersion7(),
             AssetId = command.AssetId,
             Type = command.Type,
             Value = command.Value,
         };
-        unitOfWork.Repository<TaskEntity, Ulid>().Add(entity);
+        unitOfWork.Repository<TaskEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

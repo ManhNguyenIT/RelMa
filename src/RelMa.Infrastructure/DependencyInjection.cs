@@ -16,11 +16,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
+using Quartz;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
 using RelMa.Application.Abstractions.Services;
 using RelMa.Authorization;
 using RelMa.Infrastructure.Authentication;
+using RelMa.Infrastructure.BackgroundJobs;
 using RelMa.Infrastructure.Database;
 using RelMa.Infrastructure.Database.Interceptors;
 using RelMa.Infrastructure.Storage;
@@ -29,6 +31,7 @@ using RelMa.Shared.Events;
 using StackExchange.Redis;
 
 namespace RelMa.Infrastructure;
+
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
@@ -38,11 +41,11 @@ public static class DependencyInjection
         services.AddCache(configuration);
         services.AddOpenApi(configuration);
 
-        services.AddDatabase();
+        services.AddQuartz(configuration);
+        services.AddDatabase(configuration);
         services.AddFileStorage(configuration);
 
         services.AddHttpContextAccessor();
-        services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IFileService, FileService>();
 
         services.AddAuthentication(configuration);
@@ -51,7 +54,40 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddFileStorage(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddQuartz(
+        this IServiceCollection services, 
+        IConfiguration configuration)
+    {
+        services.AddQuartz(options =>
+        {
+            options.UsePersistentStore(persistentOptions =>
+            {
+                persistentOptions.UsePostgres(config =>
+                {
+                    config.ConnectionString = configuration.GetConnectionString("SchedulerConnection")
+                        ?? throw new InvalidOperationException($"Failed to load SchedulerConnection from environment.");
+                    config.TablePrefix = "scheduler.qrtz_";
+                });
+
+                persistentOptions.UseClustering();
+                persistentOptions.UseProperties = true;
+                persistentOptions.UseNewtonsoftJsonSerializer();
+            });
+
+            var jobKey = new JobKey(nameof(ProcessSchedulerJob));
+            options
+                .AddJob<ProcessSchedulerJob>(jobKey)
+                .AddTrigger(trigger => trigger.ForJob(jobKey).WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(10).RepeatForever()));
+        });
+
+        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
+        return services;
+    }
+
+    public static IServiceCollection AddFileStorage(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddOptions<FileConfig>()
             .Bind(configuration.GetSection(nameof(FileConfig)))
@@ -77,7 +113,9 @@ public static class DependencyInjection
         return services;
     }
 
-    internal static IServiceCollection AddCache(this IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection AddCache(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddOptions<RedisConfig>()
             .Bind(configuration.GetSection(nameof(RedisConfig)))
@@ -132,7 +170,7 @@ public static class DependencyInjection
                 options.SwaggerDoc(version, new OpenApiInfo() { Version = version });
             }
 
-            options.MapType<Ulid>(() => new OpenApiSchema
+            options.MapType<DefaultIdType>(() => new OpenApiSchema
             {
                 Type = "string",
                 Format = "ulid"
@@ -224,28 +262,25 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddDatabase(this IServiceCollection services)
+    private static IServiceCollection AddDatabase(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<ISaveChangesInterceptor, DomainEventsInterceptor>();
-        services.AddScoped<ISaveChangesInterceptor, TenantEntityInterceptor>();
-        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddSingleton<IUserContext, UserContext>();
+        services.AddSingleton<ISaveChangesInterceptor, DomainEventsInterceptor>();
+        services.AddSingleton<ISaveChangesInterceptor, TenantEntityInterceptor>();
+        services.AddSingleton<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
-        services.AddScoped(provider =>
-        {
-            var userContext = provider.GetRequiredService<IUserContext>();
-            var connectionString = userContext.GetConnectionString().GetAwaiter().GetResult();
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
-                .AddInterceptors(provider.GetServices<ISaveChangesInterceptor>())
-                .UseSnakeCaseNamingConvention()
-                .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine, LogLevel.Information);
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException($"Failed to load DefaultConnection from environment.");
 
-            return new ApplicationDbContext(optionsBuilder.Options, userContext.TenantId);
-        });
-
-        return services;
+        return services.AddDbContextPool<ApplicationDbContext>((provider, options) => options
+            .UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+            .AddInterceptors(provider.GetServices<ISaveChangesInterceptor>())
+            .UseSnakeCaseNamingConvention()
+            .EnableSensitiveDataLogging()
+            .LogTo(Console.WriteLine, LogLevel.Information));
     }
 
     public static IServiceCollection AddAuthentication(
@@ -346,7 +381,8 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddAuthorization(this IServiceCollection services,
+    public static IServiceCollection AddAuthorization(
+        this IServiceCollection services,
         IConfiguration configuration)
     {
         var appConfig = configuration.GetRequiredSection(nameof(AppConfig)).Get<AppConfig>()

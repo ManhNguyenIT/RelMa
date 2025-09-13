@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Storages.V1.Commands;
 
-public sealed record DeleteStorageCommand(Ulid Id) : ICommand<bool>;
+public sealed record DeleteStorageCommand(DefaultIdType Id) : ICommand<bool>;

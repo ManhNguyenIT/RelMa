@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Storages.V1.Commands;
 
-public sealed record UpdateStorageCommand(Ulid Id, string Name) : ICommand<Ulid>;
+public sealed record UpdateStorageCommand(DefaultIdType Id, string Name) : ICommand<DefaultIdType>;

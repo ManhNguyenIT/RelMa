@@ -4,9 +4,9 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Requests;
 
-public class RequestEntity : Entity<Ulid>
+public class RequestEntity : Entity<DefaultIdType>
 {
-    public required Ulid AssetId { get; set; }
+    public required DefaultIdType AssetId { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
     public required Priority Priority { get; set; }

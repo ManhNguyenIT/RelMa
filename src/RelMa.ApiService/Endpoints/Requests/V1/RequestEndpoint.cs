@@ -14,7 +14,7 @@ using System.Linq.Dynamic.Core;
 
 namespace RelMa.ApiService.Endpoints.Requests.V1;
 
-internal class RequestEndpoint : IEndpoint
+internal sealed class RequestEndpoint : IEndpoint
 {
     private const string BaseUrl = "/api/v{version:apiVersion}/requests";
 
@@ -63,7 +63,7 @@ internal class RequestEndpoint : IEndpoint
     }
 
     public static async Task<IResult> Accept(
-        Ulid id,
+        DefaultIdType id,
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -71,7 +71,7 @@ internal class RequestEndpoint : IEndpoint
         IOptions<RedisCacheOptions> options,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<AcceptRequestCommand, Ulid>(new AcceptRequestCommand(id), cancellationToken);
+        var result = await mediator.SendCommandAsync<AcceptRequestCommand, DefaultIdType>(new AcceptRequestCommand(id), cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:requests",
@@ -81,7 +81,7 @@ internal class RequestEndpoint : IEndpoint
     }
 
     public static async Task<IResult> Reject(
-        Ulid id,
+        DefaultIdType id,
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -89,7 +89,7 @@ internal class RequestEndpoint : IEndpoint
         IOptions<RedisCacheOptions> options,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<RejectRequestCommand, Ulid>(new RejectRequestCommand(id), cancellationToken);
+        var result = await mediator.SendCommandAsync<RejectRequestCommand, DefaultIdType>(new RejectRequestCommand(id), cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:requests",
@@ -107,7 +107,7 @@ internal class RequestEndpoint : IEndpoint
         [FromBody] CreateRequestCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<CreateRequestCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<CreateRequestCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:requests",
@@ -125,7 +125,7 @@ internal class RequestEndpoint : IEndpoint
         [FromBody] UpdateRequestCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<UpdateRequestCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<UpdateRequestCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:requests",

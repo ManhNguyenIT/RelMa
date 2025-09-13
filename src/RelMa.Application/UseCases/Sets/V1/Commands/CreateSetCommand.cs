@@ -4,4 +4,4 @@ namespace RelMa.Application.UseCases.Sets.V1.Commands;
 
 public sealed record CreateSetCommand(
     string Name,
-    Ulid[] Parts) : ICommand<Ulid>;
+    DefaultIdType[] Parts) : ICommand<DefaultIdType>;

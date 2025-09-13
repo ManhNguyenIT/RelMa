@@ -11,7 +11,7 @@ public sealed class GetManufacturerQueryHandler(IUnitOfWork unitOfWork) : IQuery
 {
     public async Task<PagedResult<ManufacturerResponse>> Handle(GetManufacturerQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<ManufacturerEntity, Ulid>()
+        var query = unitOfWork.Repository<ManufacturerEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)
             .Select(x => new ManufacturerResponse()
             {

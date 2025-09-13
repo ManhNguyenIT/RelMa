@@ -6,17 +6,17 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Assets.V1.Commands;
 
-public sealed class CreateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateAssetCommand, Ulid>
+public sealed class CreateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateAssetCommand, DefaultIdType>
 {
-    public async Task<Ulid> Handle(CreateAssetCommand command, CancellationToken cancellationToken)
+    public async Task<DefaultIdType> Handle(CreateAssetCommand command, CancellationToken cancellationToken)
     {
-        if (await unitOfWork.Repository<AssetEntity, Ulid>()
+        if (await unitOfWork.Repository<AssetEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && x.Name == command.Name).AnyAsync(cancellationToken))
             throw new ConflictException($"Đã tồn tại Asset với tên {command.Name}");
 
         var entity = new AssetEntity()
         {
-            Id = Ulid.NewUlid(),
+            Id = DefaultIdType.CreateVersion7(),
             Name = command.Name,
             LocationId = command.LocationId,
             Area = command.Area,
@@ -27,7 +27,7 @@ public sealed class CreateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommand
             Model = command.Model,
             SerialNumber = command.SerialNumber,
         };
-        unitOfWork.Repository<AssetEntity, Ulid>().Add(entity);
+        unitOfWork.Repository<AssetEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

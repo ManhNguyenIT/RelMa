@@ -1,21 +1,21 @@
 ﻿using RelMa.Domain.Assets;
-using RelMa.Domain.Items;
+using RelMa.Domain.Parts;
 using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Locations;
 
-public class LocationEntity : Entity<Ulid>
+public class LocationEntity : Entity<DefaultIdType>
 {
     public LocationEntity()
     {
-        Items = new HashSet<ItemEntity>();
+        Items = new HashSet<PartEntity>();
         Assets = new HashSet<AssetEntity>();
         Children = new HashSet<LocationEntity>();
     }
     public required string Name { get; set; }
-    public Ulid? ParentId { get; set; }
+    public DefaultIdType? ParentId { get; set; }
     public virtual LocationEntity? Parent { get; set; }
-    public virtual ICollection<ItemEntity> Items { get; }
+    public virtual ICollection<PartEntity> Items { get; }
     public virtual ICollection<AssetEntity> Assets { get; }
     public virtual ICollection<LocationEntity> Children { get; }
 }

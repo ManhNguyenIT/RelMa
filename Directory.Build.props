@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AnalysisLevel>latest</AnalysisLevel>
@@ -9,6 +9,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Define the global DefaultIdType here. -->
+    <Using Include="System.Guid" Alias="DefaultIdType" />
+  </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <PackageReference Include="SonarAnalyzer.CSharp">
       <PrivateAssets>all</PrivateAssets>

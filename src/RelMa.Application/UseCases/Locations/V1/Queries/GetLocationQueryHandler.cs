@@ -11,7 +11,7 @@ public sealed class GetLocationQueryHandler(IUnitOfWork unitOfWork) : IQueryHand
 {
     public async Task<PagedResult<LocationResponse>> Handle(GetLocationQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<LocationEntity, Ulid>()
+        var query = unitOfWork.Repository<LocationEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)
             .Select(x => new LocationResponse()
             {

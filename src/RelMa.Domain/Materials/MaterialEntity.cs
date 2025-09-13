@@ -1,13 +1,13 @@
-﻿using RelMa.Domain.Items;
+﻿using RelMa.Domain.Parts;
 using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Materials;
 
-public class MaterialEntity : Entity<Ulid>
+public class MaterialEntity : Entity<DefaultIdType>
 {
     public MaterialEntity()
     {
-        Items = new HashSet<ItemEntity>();
+        Items = new HashSet<PartEntity>();
     }
     public required string Name { get; set; }
     public string? Description { get; set; }
@@ -16,5 +16,5 @@ public class MaterialEntity : Entity<Ulid>
     public int AvailableQty { get; set; }
     public int IncomingQty { get; set; }
     public int AllocatedQty { get; set; }
-    public virtual ICollection<ItemEntity> Items { get; }
+    public virtual ICollection<PartEntity> Items { get; }
 }

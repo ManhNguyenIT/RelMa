@@ -65,7 +65,7 @@ internal sealed class AssetEndpoint : IEndpoint
         [FromBody] CreateAssetCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<CreateAssetCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<CreateAssetCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:assets",
@@ -83,7 +83,7 @@ internal sealed class AssetEndpoint : IEndpoint
         [FromBody] UpdateAssetCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<UpdateAssetCommand, Ulid>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<UpdateAssetCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:assets",
