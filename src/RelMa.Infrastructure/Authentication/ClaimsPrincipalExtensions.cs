@@ -12,12 +12,12 @@ internal static class ClaimsPrincipalExtensions
         return principal.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 
-    public static string? GetTenantId(this ClaimsPrincipal principal)
+    public static string[] GetTenantIds(this ClaimsPrincipal principal)
     {
-        if (principal?.Identity?.IsAuthenticated != true)
-            return null;
+        if (principal.Identity?.IsAuthenticated != true)
+            return [];
 
-        return principal.FindFirstValue("tenant_id");
+        return [.. principal.FindAll("tenant_id").Select(c => c.Value).Where(v => !string.IsNullOrEmpty(v))];
     }
 
     public static string? GetUsername(this ClaimsPrincipal principal)

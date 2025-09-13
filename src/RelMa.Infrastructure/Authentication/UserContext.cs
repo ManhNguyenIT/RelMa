@@ -10,15 +10,29 @@ namespace RelMa.Infrastructure.Authentication;
 internal sealed class UserContext(
     IDistributedCache cache,
     IConfiguration configuration,
-    IHttpContextAccessor httpContextAccessor) : IUserContext
+    IHttpContextAccessor contextAccessor) : IUserContext
 {
-    public string? Name => httpContextAccessor.HttpContext?.User.GetName();
-    public string? Company => httpContextAccessor.HttpContext?.User.GetCompany();
-    public string? PhoneNumber => httpContextAccessor.HttpContext?.User.GetPhoneNumber();
-    public string UserId => httpContextAccessor.HttpContext?.User.GetUserId()
+    public string? Name => contextAccessor.HttpContext?.User.GetName();
+    public string? Company => contextAccessor.HttpContext?.User.GetCompany();
+    public string? PhoneNumber => contextAccessor.HttpContext?.User.GetPhoneNumber();
+    public string UserId => contextAccessor.HttpContext?.User.GetUserId()
         ?? throw new UnauthorizedException("UserId not found.");
-    public string? TenantId => httpContextAccessor.HttpContext?.User.GetTenantId();
-    public string? Username => httpContextAccessor.HttpContext?.User.GetUsername();
+    public string? TenantId
+    {
+        get
+        {
+            var httpContext = contextAccessor.HttpContext;
+            if (httpContext == null) return null;
+
+            var tenantId = httpContext.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+            var tenantIds = httpContext.User.GetTenantIds();
+
+            return string.IsNullOrEmpty(tenantId)
+                ? tenantIds.FirstOrDefault()
+                : tenantIds.Contains(tenantId) ? tenantId : null;
+        }
+    }
+    public string? Username => contextAccessor.HttpContext?.User.GetUsername();
 
     public async Task<string> GetConnectionString() =>
         await cache.GetOrCreateAsync(

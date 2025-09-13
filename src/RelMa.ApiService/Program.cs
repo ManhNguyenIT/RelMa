@@ -1,6 +1,7 @@
-  using RelMa.ApiService.Extensions;
+using RelMa.ApiService.Extensions;
 using RelMa.Application;
 using RelMa.Infrastructure;
+using RelMa.Shared;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,8 +32,7 @@ app.UseRequestContextLogging();
 app.UseSerilogRequestLogging();
 
 app.MapEndpoints();
-app.MapHealthChecks("/health");
-
+app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwaggerWithUi();

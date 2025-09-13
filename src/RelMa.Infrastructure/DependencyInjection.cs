@@ -267,15 +267,15 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddSingleton<IUserContext, UserContext>();
-        services.AddSingleton<ISaveChangesInterceptor, DomainEventsInterceptor>();
-        services.AddSingleton<ISaveChangesInterceptor, TenantEntityInterceptor>();
-        services.AddSingleton<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddScoped<IUserContext, UserContext>();
+        services.AddScoped<ISaveChangesInterceptor, DomainEventsInterceptor>();
+        services.AddScoped<ISaveChangesInterceptor, TenantEntityInterceptor>();
+        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException($"Failed to load DefaultConnection from environment.");
 
-        return services.AddDbContextPool<ApplicationDbContext>((provider, options) => options
+        return services.AddDbContext<ApplicationDbContext>((provider, options) => options
             .UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
             .AddInterceptors(provider.GetServices<ISaveChangesInterceptor>())
             .UseSnakeCaseNamingConvention()
