@@ -6,7 +6,9 @@ using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Assets.V1.Commands;
 
-public sealed class CreateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<CreateAssetCommand, DefaultIdType>
+public sealed class CreateAssetCommandHandler(
+    IUnitOfWork unitOfWork
+    ) : ICommandHandler<CreateAssetCommand, DefaultIdType>
 {
     public async Task<DefaultIdType> Handle(CreateAssetCommand command, CancellationToken cancellationToken)
     {
@@ -26,7 +28,9 @@ public sealed class CreateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommand
             ManufacturerId = command.ManufacturerId,
             Model = command.Model,
             SerialNumber = command.SerialNumber,
+            Images = command.Images
         };
+
         unitOfWork.Repository<AssetEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

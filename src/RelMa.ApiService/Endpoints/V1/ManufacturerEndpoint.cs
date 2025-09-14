@@ -5,23 +5,23 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
 using RelMa.ApiService.Abstractions;
 using RelMa.Application.Abstractions.Authentication;
-using RelMa.Application.UseCases.Locations.V1.Commands;
-using RelMa.Application.UseCases.Locations.V1.Queries;
-using RelMa.Application.UseCases.Locations.V1.Responses;
-using RelMa.Infrastructure.Caching;
+using RelMa.Application.UseCases.Manufacturers.V1.Commands;
+using RelMa.Application.UseCases.Manufacturers.V1.Queries;
+using RelMa.Application.UseCases.Manufacturers.V1.Responses;
+using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
 using StackExchange.Redis;
 
-namespace RelMa.ApiService.Endpoints.Locations.V1;
+namespace RelMa.ApiService.Endpoints.V1;
 
-internal sealed class LocationEndpoint : IEndpoint
+internal sealed class ManufacturerEndpoint : IEndpoint
 {
-    private const string BaseUrl = "/api/v{version:apiVersion}/locations";
+    private const string BaseUrl = "/api/v{version:apiVersion}/manufacturers";
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         var route = app.NewVersionedApi()
-            .WithTags("Locations")
+            .WithTags("Manufacturers")
             .MapGroup(BaseUrl)
             .HasApiVersion(1.0);
 
@@ -42,13 +42,13 @@ internal sealed class LocationEndpoint : IEndpoint
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
-        [AsParameters] GetLocationQuery query,
+        [AsParameters] GetManufacturerQuery query,
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:locations",
+            key: $"{userContext.TenantId}:manufacturers",
             param: query,
-            factory: async token => await mediator.SendQueryAsync<GetLocationQuery, PagedResult<LocationResponse>>(query, token),
+            factory: async token => await mediator.SendQueryAsync<GetManufacturerQuery, PagedResult<ManufacturerResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
             cancellationToken: cancellationToken
         );
@@ -62,13 +62,13 @@ internal sealed class LocationEndpoint : IEndpoint
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] CreateLocationCommand command,
+        [FromBody] CreateManufacturerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<CreateLocationCommand, DefaultIdType>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<CreateManufacturerCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:locations",
+            $"{userContext.TenantId}:manufacturers",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -80,13 +80,13 @@ internal sealed class LocationEndpoint : IEndpoint
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] UpdateLocationCommand command,
+        [FromBody] UpdateManufacturerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<UpdateLocationCommand, DefaultIdType>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<UpdateManufacturerCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:locations",
+            $"{userContext.TenantId}:manufacturers",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -98,13 +98,13 @@ internal sealed class LocationEndpoint : IEndpoint
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] DeleteLocationCommand command,
+        [FromBody] DeleteManufacturerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<DeleteLocationCommand, bool>(command, cancellationToken);
+        var result = await mediator.SendCommandAsync<DeleteManufacturerCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:locations",
+            $"{userContext.TenantId}:manufacturers",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

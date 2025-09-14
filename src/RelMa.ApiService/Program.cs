@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using RelMa.ApiService.Extensions;
 using RelMa.Application;
 using RelMa.Infrastructure;
@@ -21,6 +22,18 @@ builder.Services.AddEndpoints(typeof(Program).Assembly);
 var app = builder.Build();
 
 app.UseExceptionHandler();
+
+var staticsPath = Path.Combine(builder.Environment.ContentRootPath, "statics");
+if (!Directory.Exists(staticsPath))
+{
+    Directory.CreateDirectory(staticsPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(staticsPath),
+    RequestPath = "/statics"
+});
 
 app.UseRouting();
 app.UseCors();

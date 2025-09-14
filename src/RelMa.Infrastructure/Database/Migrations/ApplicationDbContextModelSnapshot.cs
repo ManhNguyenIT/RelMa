@@ -66,6 +66,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
 
+                    b.PrimitiveCollection<string[]>("Images")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");

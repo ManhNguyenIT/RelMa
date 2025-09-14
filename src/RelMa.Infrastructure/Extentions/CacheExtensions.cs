@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
 
-namespace RelMa.Infrastructure.Caching;
+namespace RelMa.Infrastructure.Extentions;
 
 public static class DistributedCacheExtensions
 {

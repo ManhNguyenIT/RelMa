@@ -3,7 +3,7 @@ using RelMa.ApiService.Abstractions;
 using RelMa.Application.UseCases.Users.V1.Commands;
 using RelMa.Application.UseCases.Users.V1.Responses;
 
-namespace RelMa.ApiService.Endpoints.WorkOrders.V1;
+namespace RelMa.ApiService.Endpoints.V1;
 
 internal sealed class WorkOrderEndpoint : IEndpoint
 {

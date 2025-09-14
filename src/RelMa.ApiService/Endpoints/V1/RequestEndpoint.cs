@@ -8,11 +8,11 @@ using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.UseCases.Requests.V1.Commands;
 using RelMa.Application.UseCases.Requests.V1.Queries;
 using RelMa.Application.UseCases.Requests.V1.Responses;
-using RelMa.Infrastructure.Caching;
+using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
 using StackExchange.Redis;
 
-namespace RelMa.ApiService.Endpoints.Requests.V1;
+namespace RelMa.ApiService.Endpoints.V1;
 
 internal sealed class RequestEndpoint : IEndpoint
 {

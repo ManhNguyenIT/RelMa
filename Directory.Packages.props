@@ -37,6 +37,7 @@
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.0" />
     <PackageVersion Include="Quartz.Serialization.Json" Version="3.15.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.11" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.15.0.120848" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />

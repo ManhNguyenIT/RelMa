@@ -5,10 +5,10 @@ using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.UseCases.Users.V1.Commands;
 using RelMa.Application.UseCases.Users.V1.Queries;
 using RelMa.Application.UseCases.Users.V1.Responses;
-using RelMa.Infrastructure.Caching;
+using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
 
-namespace RelMa.ApiService.Endpoints.Users.V1;
+namespace RelMa.ApiService.Endpoints.V1;
 
 internal sealed class UserEndpoint : IEndpoint
 {

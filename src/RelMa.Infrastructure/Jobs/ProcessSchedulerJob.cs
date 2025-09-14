@@ -1,6 +1,6 @@
 ﻿using Quartz;
 
-namespace RelMa.Infrastructure.BackgroundJobs;
+namespace RelMa.Infrastructure.Jobs;
 
 internal sealed class ProcessSchedulerJob : IJob
 {

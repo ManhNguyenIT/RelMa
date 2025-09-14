@@ -5,7 +5,7 @@ using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Services;
 using System.IO.Compression;
 
-namespace RelMa.Infrastructure.Storage;
+namespace RelMa.Infrastructure.Services;
 
 internal sealed class FileService(IMinioClient minioClient, IUserContext userContext) : IFileService
 {

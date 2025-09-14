@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using RelMa.Application.Abstractions.Authentication;
-using RelMa.Infrastructure.Caching;
+using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
 using RelMa.Shared.Exceptions;
 

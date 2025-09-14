@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using RelMa.ApiService.Abstractions;
 
-namespace RelMa.ApiService.Endpoints.Auth.V1;
+namespace RelMa.ApiService.Endpoints.V1;
 
 internal sealed class AuthEndpoint : IEndpoint
 {

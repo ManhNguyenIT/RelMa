@@ -19,13 +19,14 @@ using Minio;
 using Quartz;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
+using RelMa.Application.Abstractions.Jobs;
 using RelMa.Application.Abstractions.Services;
 using RelMa.Authorization;
 using RelMa.Infrastructure.Authentication;
-using RelMa.Infrastructure.BackgroundJobs;
 using RelMa.Infrastructure.Database;
 using RelMa.Infrastructure.Database.Interceptors;
-using RelMa.Infrastructure.Storage;
+using RelMa.Infrastructure.Jobs;
+using RelMa.Infrastructure.Services;
 using RelMa.Shared;
 using RelMa.Shared.Events;
 using StackExchange.Redis;
@@ -46,7 +47,8 @@ public static class DependencyInjection
         services.AddFileStorage(configuration);
 
         services.AddHttpContextAccessor();
-        services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IUserContext, UserContext>();
+        services.AddSingleton<IImageService, ImageService>();
 
         services.AddAuthentication(configuration);
         services.AddAuthorization(configuration);
@@ -74,6 +76,8 @@ public static class DependencyInjection
                 persistentOptions.UseNewtonsoftJsonSerializer();
             });
 
+            options.AddJob<ProcessThumbnailJob>(opts => opts.WithIdentity(nameof(ProcessThumbnailJob)).StoreDurably());
+
             var jobKey = new JobKey(nameof(ProcessSchedulerJob));
             options
                 .AddJob<ProcessSchedulerJob>(jobKey)
@@ -81,6 +85,7 @@ public static class DependencyInjection
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+        services.AddScoped<IJobScheduler, QuartzJobScheduler>();
 
         return services;
     }
@@ -267,7 +272,6 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ISaveChangesInterceptor, DomainEventsInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, TenantEntityInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();

@@ -13,7 +13,7 @@ using RelMa.Infrastructure.Database;
 namespace RelMa.Infrastructure.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250913042130_InitialCreate")]
+    [Migration("20250913101837_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -68,6 +68,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.PrimitiveCollection<string[]>("Images")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")

@@ -10,6 +10,7 @@ public class AssetEntity : Entity<DefaultIdType>
 {
     public AssetEntity()
     {
+        Images = [];
         Tasks = new HashSet<TaskEntity>();
         Requests = new HashSet<RequestEntity>();
     }
@@ -20,6 +21,7 @@ public class AssetEntity : Entity<DefaultIdType>
     public string? Description { get; set; }
     public string? Model { get; set; }
     public string? SerialNumber { get; set; }
+    public string[] Images { get; set; }
     public required DefaultIdType LocationId { get; set; }
     public DefaultIdType? ManufacturerId { get; set; }
 

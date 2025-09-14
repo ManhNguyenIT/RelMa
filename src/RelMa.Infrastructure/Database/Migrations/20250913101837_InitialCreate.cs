@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -202,6 +203,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                     description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     model = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     serial_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    images = table.Column<string[]>(type: "text[]", nullable: false),
                     location_id = table.Column<Guid>(type: "uuid", nullable: false),
                     manufacturer_id = table.Column<Guid>(type: "uuid", nullable: true),
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
