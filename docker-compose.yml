@@ -9,7 +9,7 @@ services:
 
   relma.api-service:
     container_name: relma.api-service
-    image: ${DOCKER_REGISTRY-}relma.apiservice
+    image: ${DOCKER_REGISTRY-}relma.api-service
     build:
       context: .
       dockerfile: src/RelMa.ApiService/Dockerfile
@@ -25,7 +25,7 @@ services:
 
   relma.web-app:
     container_name: relma.web-app
-    image: ${DOCKER_REGISTRY-}web
+    image: ${DOCKER_REGISTRY-}relma.web-app
     build:
       context: ./src/RelMa.Web
       dockerfile: Dockerfile

@@ -817,9 +817,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("current_value");
 
                     b.HasKey("SeqDate", "TableName", "TenantId")
-                        .HasName("pk_sequence_entity");
+                        .HasName("pk_sequences");
 
-                    b.ToTable("sequence_entity", "public");
+                    b.ToTable("sequences", "public");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Sets.SetEntity", b =>

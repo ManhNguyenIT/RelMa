@@ -31,7 +31,4 @@ RUN dotnet publish "./RelMa.ApiService.csproj" -c $BUILD_CONFIGURATION -o /app/p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN mkdir -p /app/assets/originals /app/assets/thumbnails && \
-    chown -R 1000:1000 /app/assets && \
-    chmod -R 775 /app/assets
 ENTRYPOINT ["dotnet", "RelMa.ApiService.dll"]
