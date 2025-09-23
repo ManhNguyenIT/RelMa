@@ -23,7 +23,7 @@ internal sealed class AssetEntityConfiguration : IEntityTypeConfiguration<AssetE
         builder.Property(t => t.Area)
             .HasMaxLength(250);
 
-        builder.Property(t => t.Barcode)
+        builder.Property(t => t.SerialNumber)
             .HasMaxLength(100);
 
         builder.Property(t => t.Category)
@@ -35,17 +35,12 @@ internal sealed class AssetEntityConfiguration : IEntityTypeConfiguration<AssetE
         builder.Property(t => t.Model)
             .HasMaxLength(50);
 
-        builder.Property(t => t.SerialNumber)
+        builder.Property(t => t.Code)
             .HasMaxLength(50);
 
         builder.HasOne(t => t.Location)
             .WithMany(t => t.Assets)
             .HasForeignKey(t => t.LocationId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(t => t.Manufacturer)
-            .WithMany(t => t.Assets)
-            .HasForeignKey(t => t.ManufacturerId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

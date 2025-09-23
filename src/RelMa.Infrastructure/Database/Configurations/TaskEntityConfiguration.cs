@@ -20,6 +20,11 @@ internal sealed class TaskEntityConfiguration : IEntityTypeConfiguration<TaskEnt
             .WithMany(t => t.Tasks)
             .HasForeignKey(t => t.AssetId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(t => t.Checklist)
+            .WithMany(t => t.Tasks)
+            .HasForeignKey(t => t.ChecklistId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

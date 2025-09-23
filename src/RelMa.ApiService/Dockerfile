@@ -6,7 +6,6 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -32,4 +31,7 @@ RUN dotnet publish "./RelMa.ApiService.csproj" -c $BUILD_CONFIGURATION -o /app/p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir -p /app/assets/originals /app/assets/thumbnails && \
+    chown -R 1000:1000 /app/assets && \
+    chmod -R 775 /app/assets
 ENTRYPOINT ["dotnet", "RelMa.ApiService.dll"]

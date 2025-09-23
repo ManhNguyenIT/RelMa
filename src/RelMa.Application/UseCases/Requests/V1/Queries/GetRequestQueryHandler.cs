@@ -17,12 +17,13 @@ public sealed class GetRequestQueryHandler(IUnitOfWork unitOfWork) : IQueryHandl
             .Select(x => new RequestResponse()
             {
                 Id = x.Id,
-                Priority = x.Priority,
-                Status = x.Status,
                 Title = x.Title,
                 Description = x.Description,
-                Image = x.Image,
                 AssetId = x.AssetId,
+                Status = x.Status,
+                Category = x.Category,
+                Priority = x.Priority,
+                Images = x.Images,
                 Asset = x.Asset == null ? null : new Assets.V1.Responses.AssetResponse()
                 {
                     Id = x.Asset.Id,
@@ -33,8 +34,24 @@ public sealed class GetRequestQueryHandler(IUnitOfWork unitOfWork) : IQueryHandl
                         Id = x.Asset.Location.Id,
                         Name = x.Asset.Location.Name,
                     }
-                }
+                },
+                WorkOrderId = x.WorkOrderId,
+                Files = x.Files == null ? null : x.Files.Where(f => !f.IsDeleted).Select(f => new Files.V1.Responses.FileResponse()
+                {
+                    Id = f.Id,
+                    Ext = f.Ext,
+                    Name = f.Name,
+                    Size = f.Size,
+                }),
             });
+
+        if (!string.IsNullOrEmpty(request.Q))
+            query = query.Where(x =>
+                x.Title != null && EF.Functions.ILike(x.Title, $"%{request.Q}%")
+                || x.Description != null && EF.Functions.ILike(x.Description, $"%{request.Q}%")
+                || x.Asset != null && x.Asset.Name != null && EF.Functions.ILike(x.Asset.Name, $"%{request.Q}%")
+                || x.Asset != null && x.Asset.Location != null && x.Asset.Location.Name != null && EF.Functions.ILike(x.Asset.Location.Name, $"%{request.Q}%")
+            );
 
         if (request.Includes?.Length > 0)
             query = query.Includes(request.Includes.Split(','));

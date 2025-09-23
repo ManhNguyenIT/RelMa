@@ -20,13 +20,12 @@ public class UpdateAssetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler
 
         entity.Name = command.Name;
         entity.Area = command.Area;
-        entity.Barcode = command.Barcode;
+        entity.SerialNumber = command.Barcode;
         entity.Category = command.Category;
         entity.Description = command.Description;
         entity.LocationId = command.LocationId;
-        entity.ManufacturerId = command.ManufacturerId;
         entity.Model = command.Model;
-        entity.SerialNumber = command.SerialNumber;
+        entity.Code = command.SerialNumber;
 
         unitOfWork.Repository<AssetEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);

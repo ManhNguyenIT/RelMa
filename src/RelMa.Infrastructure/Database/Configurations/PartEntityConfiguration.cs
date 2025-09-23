@@ -17,17 +17,17 @@ internal sealed class PartEntityConfiguration : IEntityTypeConfiguration<PartEnt
             .HasMaxLength(36);
 
         builder.HasOne(t => t.Storage)
-            .WithMany(t => t.Items)
+            .WithMany(t => t.Parts)
             .HasForeignKey(t => t.StorageId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.Location)
-            .WithMany(t => t.Items)
+            .WithMany(t => t.Parts)
             .HasForeignKey(t => t.LocationId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.Material)
-            .WithMany(t => t.Items)
+            .WithMany(t => t.Parts)
             .HasForeignKey(t => t.MaterialId)
             .OnDelete(DeleteBehavior.Cascade);
     }

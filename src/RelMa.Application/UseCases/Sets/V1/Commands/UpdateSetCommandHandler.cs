@@ -20,9 +20,7 @@ public class UpdateSetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<U
             throw new ConflictException($"Đã tồn tại Set với tên {command.Name}");
 
         entity.Name = command.Name;
-
-        entity.AddParts(
-            await unitOfWork.Repository<PartEntity, DefaultIdType>()
+        entity.SetParts(await unitOfWork.Repository<PartEntity, DefaultIdType>()
                 .Find(x => !x.IsDeleted && command.Parts.Contains(x.Id)).ToListAsync(cancellationToken));
 
         unitOfWork.Repository<SetEntity, DefaultIdType>().Update(entity);

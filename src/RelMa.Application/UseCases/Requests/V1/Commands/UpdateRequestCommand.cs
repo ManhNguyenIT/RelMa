@@ -8,6 +8,7 @@ public sealed record UpdateRequestCommand(
     DefaultIdType AssetId,
     string Title,
     string? Description,
+    Status Status,
+    Category Category,
     Priority Priority,
-    string? Image,
-    Status Status) : ICommand<DefaultIdType>;
+    string[]? Images) : ICommand<DefaultIdType>;

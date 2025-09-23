@@ -20,6 +20,12 @@ internal sealed class RequestEntityConfiguration : IEntityTypeConfiguration<Requ
             .WithMany(t => t.Requests)
             .HasForeignKey(t => t.AssetId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(t => t.WorkOrder)
+            .WithOne(t => t.Request)
+            .HasForeignKey<RequestEntity>(t => t.WorkOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }
 

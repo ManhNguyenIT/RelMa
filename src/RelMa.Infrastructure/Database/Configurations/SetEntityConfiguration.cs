@@ -23,7 +23,7 @@ internal sealed class SetEntityConfiguration : IEntityTypeConfiguration<SetEntit
 
         builder.HasMany(t => t.Parts)
             .WithMany(t => t.Sets)
-            .UsingEntity<Dictionary<string, object>>(
+            .UsingEntity<Dictionary<Guid, Guid>>(
                 "SetsAndParts",
                 r => r.HasOne<PartEntity>().WithMany().HasForeignKey("PartId"),
                 l => l.HasOne<SetEntity>().WithMany().HasForeignKey("SetId"),
@@ -31,7 +31,6 @@ internal sealed class SetEntityConfiguration : IEntityTypeConfiguration<SetEntit
                 {
                     je.HasKey("PartId", "SetId");
                 });
-
     }
 }
 

@@ -20,11 +20,6 @@ internal sealed class ChecklistEntityConfiguration : IEntityTypeConfiguration<Ch
             .IsRequired()
             .HasMaxLength(100);
 
-        //builder.HasOne(t => t.Task)
-        //    .WithMany(t => t.Checklists)
-        //    .HasForeignKey(t => t.LocationId)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasOne(t => t.WorkOrder)
             .WithMany(t => t.Checklists)
             .HasForeignKey(t => t.WorkOrderId)

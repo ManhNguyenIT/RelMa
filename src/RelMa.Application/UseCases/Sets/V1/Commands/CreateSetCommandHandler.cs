@@ -21,8 +21,7 @@ public sealed class CreateSetCommandHandler(IUnitOfWork unitOfWork) : ICommandHa
             Name = command.Name,
         };
 
-        entity.AddParts(
-            await unitOfWork.Repository<PartEntity, DefaultIdType>()
+        entity.SetParts(await unitOfWork.Repository<PartEntity, DefaultIdType>()
                 .Find(x => !x.IsDeleted && command.Parts.Contains(x.Id)).ToListAsync(cancellationToken));
 
         unitOfWork.Repository<SetEntity, DefaultIdType>().Add(entity);

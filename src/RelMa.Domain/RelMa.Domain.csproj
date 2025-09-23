@@ -2,4 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RelMa.Shared\RelMa.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Schedules\" />
+  </ItemGroup>
 </Project>

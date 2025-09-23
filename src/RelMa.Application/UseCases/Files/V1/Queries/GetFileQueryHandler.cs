@@ -19,7 +19,6 @@ public sealed class GetFileQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<
                 Name = x.Name,
                 Ext = x.Ext,
                 Size = x.Size,
-                Source = x.Source,
             });
 
         if (request.Includes?.Length > 0)

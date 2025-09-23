@@ -24,6 +24,94 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AssetsAndMaintenances", b =>
+                {
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_id");
+
+                    b.Property<Guid>("MaintenanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("maintenance_id");
+
+                    b.HasKey("AssetId", "MaintenanceId")
+                        .HasName("pk_assets_and_maintenances");
+
+                    b.HasIndex("MaintenanceId")
+                        .HasDatabaseName("ix_assets_and_maintenances_maintenance_id");
+
+                    b.ToTable("assets_and_maintenances", "public");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.AssetLogs.AssetLogEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_id");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("interval")
+                        .HasColumnName("duration");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<DateTimeOffset>("Started")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asset_logs");
+
+                    b.HasIndex("AssetId")
+                        .HasDatabaseName("ix_asset_logs_asset_id");
+
+                    b.ToTable("asset_logs", "public");
+                });
+
             modelBuilder.Entity("RelMa.Domain.Assets.AssetEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -35,15 +123,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("area");
 
-                    b.Property<string>("Barcode")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("barcode");
-
                     b.Property<string>("Category")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("category");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -67,7 +156,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("description");
 
                     b.PrimitiveCollection<string[]>("Images")
-                        .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("images");
 
@@ -79,9 +167,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("location_id");
 
-                    b.Property<Guid?>("ManufacturerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("manufacturer_id");
+                    b.Property<JsonDocument>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
 
                     b.Property<string>("Model")
                         .HasMaxLength(50)
@@ -103,9 +191,13 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("name");
 
                     b.Property<string>("SerialNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("serial_number");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<string>("TenantId")
                         .HasMaxLength(36)
@@ -117,9 +209,6 @@ namespace RelMa.Infrastructure.Database.Migrations
 
                     b.HasIndex("LocationId")
                         .HasDatabaseName("ix_assets_location_id");
-
-                    b.HasIndex("ManufacturerId")
-                        .HasDatabaseName("ix_assets_manufacturer_id");
 
                     b.ToTable("assets", "public");
                 });
@@ -168,10 +257,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
-                    b.Property<Guid>("TaskId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("task_id");
-
                     b.Property<string>("TenantId")
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
@@ -184,9 +269,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.HasKey("Id")
                         .HasName("pk_checklists");
 
-                    b.HasIndex("TaskId")
-                        .HasDatabaseName("ix_checklists_task_id");
-
                     b.HasIndex("WorkOrderId")
                         .HasDatabaseName("ix_checklists_work_order_id");
 
@@ -198,6 +280,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("AssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_id");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -239,6 +325,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
                     b.Property<long>("Size")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
@@ -256,8 +346,21 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("tenant_id");
 
+                    b.Property<Guid?>("WorkOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_order_id");
+
                     b.HasKey("Id")
                         .HasName("pk_files");
+
+                    b.HasIndex("AssetId")
+                        .HasDatabaseName("ix_files_asset_id");
+
+                    b.HasIndex("RequestId")
+                        .HasDatabaseName("ix_files_request_id");
+
+                    b.HasIndex("WorkOrderId")
+                        .HasDatabaseName("ix_files_work_order_id");
 
                     b.ToTable("files", "public");
                 });
@@ -283,6 +386,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("text")
                         .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -323,13 +430,8 @@ namespace RelMa.Infrastructure.Database.Migrations
             modelBuilder.Entity("RelMa.Domain.Maintenances.MaintenanceEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<Guid>("AssetId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("asset_id");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -339,6 +441,12 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<string>("CronExpression")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("cron_expression");
+
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
@@ -346,6 +454,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("text")
                         .HasColumnName("deleted_by");
+
+                    b.PrimitiveCollection<string[]>("Images")
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -360,23 +472,34 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<string>("TenantId")
-                        .HasColumnType("text")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_order_id");
 
                     b.HasKey("Id")
                         .HasName("pk_maintenances");
 
-                    b.HasIndex("AssetId")
-                        .HasDatabaseName("ix_maintenances_asset_id");
-
                     b.ToTable("maintenances", "public");
                 });
 
-            modelBuilder.Entity("RelMa.Domain.Manufacturers.ManufacturerEntity", b =>
+            modelBuilder.Entity("RelMa.Domain.Materials.MaterialEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<int>("Allocated")
+                        .HasColumnType("integer")
+                        .HasColumnName("allocated");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -394,9 +517,26 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("deleted_by");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.PrimitiveCollection<string[]>("Images")
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
+
+                    b.Property<int>("Incoming")
+                        .HasColumnType("integer")
+                        .HasColumnName("incoming");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<int>("Minimum")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum");
 
                     b.Property<DateTimeOffset?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone")
@@ -408,9 +548,16 @@ namespace RelMa.Infrastructure.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<int>("OnHand")
+                        .HasColumnType("integer")
+                        .HasColumnName("on_hand");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<string>("TenantId")
                         .HasMaxLength(36)
@@ -418,25 +565,63 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_manufacturers");
+                        .HasName("pk_materials");
 
-                    b.ToTable("manufacturers", "public");
+                    b.ToTable("materials", "public");
                 });
 
-            modelBuilder.Entity("RelMa.Domain.Materials.MaterialEntity", b =>
+            modelBuilder.Entity("RelMa.Domain.OutboxMessages.OutboxMessageEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<int>("AllocatedQty")
-                        .HasColumnType("integer")
-                        .HasColumnName("allocated_qty");
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
 
-                    b.Property<int>("AvailableQty")
-                        .HasColumnType("integer")
-                        .HasColumnName("available_qty");
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
+
+                    b.ToTable("outbox_messages", "public");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.Parts.PartEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AssetEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_entity_id");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("cost");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -458,66 +643,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
-
-                    b.Property<int>("IncomingQty")
+                    b.Property<int>("Inventory")
                         .HasColumnType("integer")
-                        .HasColumnName("incoming_qty");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<int>("MinQty")
-                        .HasColumnType("integer")
-                        .HasColumnName("min_qty");
-
-                    b.Property<DateTimeOffset?>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("modified_at");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("modified_by");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("TenantId")
-                        .HasColumnType("text")
-                        .HasColumnName("tenant_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_materials");
-
-                    b.ToTable("materials", "public");
-                });
-
-            modelBuilder.Entity("RelMa.Domain.Parts.PartEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("deleted_by");
+                        .HasColumnName("inventory");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -547,6 +675,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
                     b.Property<Guid?>("StorageId")
                         .HasColumnType("uuid")
                         .HasColumnName("storage_id");
@@ -562,6 +694,9 @@ namespace RelMa.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_parts");
+
+                    b.HasIndex("AssetEntityId")
+                        .HasDatabaseName("ix_parts_asset_entity_id");
 
                     b.HasIndex("LocationId")
                         .HasDatabaseName("ix_parts_location_id");
@@ -588,6 +723,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("asset_id");
 
+                    b.Property<int>("Category")
+                        .HasColumnType("integer")
+                        .HasColumnName("category");
+
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -608,9 +747,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
+                    b.PrimitiveCollection<string[]>("Images")
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -642,6 +781,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
+                    b.Property<Guid?>("WorkOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_order_id");
+
                     b.HasKey("Id")
                         .HasName("pk_requests");
 
@@ -649,6 +792,34 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_requests_asset_id");
 
                     b.ToTable("requests", "public");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.Sequences.SequenceEntity", b =>
+                {
+                    b.Property<DateOnly>("SeqDate")
+                        .HasColumnType("date")
+                        .HasColumnName("seq_date");
+
+                    b.Property<string>("TableName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("table_name");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("CurrentValue")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("current_value");
+
+                    b.HasKey("SeqDate", "TableName", "TenantId")
+                        .HasName("pk_sequence_entity");
+
+                    b.ToTable("sequence_entity", "public");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Sets.SetEntity", b =>
@@ -705,7 +876,6 @@ namespace RelMa.Infrastructure.Database.Migrations
             modelBuilder.Entity("RelMa.Domain.Storages.StorageEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -726,7 +896,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("description");
 
                     b.Property<bool>("IsDeleted")
@@ -747,11 +918,13 @@ namespace RelMa.Infrastructure.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
                     b.Property<string>("TenantId")
-                        .HasColumnType("text")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
@@ -772,6 +945,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<Guid>("AssetId")
                         .HasColumnType("uuid")
                         .HasColumnName("asset_id");
+
+                    b.Property<Guid?>("ChecklistId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("checklist_id");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -825,6 +1002,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.HasIndex("AssetId")
                         .HasDatabaseName("ix_tasks_asset_id");
 
+                    b.HasIndex("ChecklistId")
+                        .HasDatabaseName("ix_tasks_checklist_id");
+
                     b.HasIndex("WorkOrderEntityId")
                         .HasDatabaseName("ix_tasks_work_order_entity_id");
 
@@ -836,6 +1016,10 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("AssetEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_entity_id");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -887,6 +1071,9 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.HasKey("Id")
                         .HasName("pk_teams");
 
+                    b.HasIndex("AssetEntityId")
+                        .HasDatabaseName("ix_teams_asset_entity_id");
+
                     b.HasIndex("LeaderId")
                         .HasDatabaseName("ix_teams_leader_id");
 
@@ -900,7 +1087,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Company")
-                        .HasColumnType("text")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("company");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
@@ -932,11 +1120,13 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("phone_number");
 
                     b.Property<string>("TenantId")
@@ -945,7 +1135,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("Username")
-                        .HasColumnType("text")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("username");
 
                     b.HasKey("Id")
@@ -959,6 +1150,14 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<string>("AssigneeId")
+                        .HasColumnType("text")
+                        .HasColumnName("assignee_id");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer")
+                        .HasColumnName("category");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -976,6 +1175,18 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("deleted_by");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<TimeSpan?>("Estimate")
+                        .HasColumnType("interval")
+                        .HasColumnName("estimate");
+
+                    b.PrimitiveCollection<string[]>("Images")
+                        .HasColumnType("text[]")
+                        .HasColumnName("images");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
@@ -992,6 +1203,19 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("modified_by");
 
+                    b.Property<string>("No")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("no");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
                     b.Property<Guid?>("RequestId")
                         .HasColumnType("uuid")
                         .HasColumnName("request_id");
@@ -1005,8 +1229,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("tenant_id");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
                     b.HasKey("Id")
                         .HasName("pk_work_orders");
+
+                    b.HasIndex("AssigneeId")
+                        .HasDatabaseName("ix_work_orders_assignee_id");
 
                     b.HasIndex("MaintenanceId")
                         .IsUnique()
@@ -1057,6 +1289,35 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.ToTable("teams_and_members", "public");
                 });
 
+            modelBuilder.Entity("AssetsAndMaintenances", b =>
+                {
+                    b.HasOne("RelMa.Domain.Assets.AssetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_assets_and_maintenances_assets_asset_id");
+
+                    b.HasOne("RelMa.Domain.Maintenances.MaintenanceEntity", null)
+                        .WithMany()
+                        .HasForeignKey("MaintenanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_assets_and_maintenances_maintenances_maintenance_id");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.AssetLogs.AssetLogEntity", b =>
+                {
+                    b.HasOne("RelMa.Domain.Assets.AssetEntity", "Asset")
+                        .WithMany("AssetLogs")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_asset_logs_assets_asset_id");
+
+                    b.Navigation("Asset");
+                });
+
             modelBuilder.Entity("RelMa.Domain.Assets.AssetEntity", b =>
                 {
                     b.HasOne("RelMa.Domain.Locations.LocationEntity", "Location")
@@ -1066,26 +1327,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_assets_locations_location_id");
 
-                    b.HasOne("RelMa.Domain.Manufacturers.ManufacturerEntity", "Manufacturer")
-                        .WithMany("Assets")
-                        .HasForeignKey("ManufacturerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_assets_manufacturers_manufacturer_id");
-
                     b.Navigation("Location");
-
-                    b.Navigation("Manufacturer");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Checklists.ChecklistEntity", b =>
                 {
-                    b.HasOne("RelMa.Domain.Tasks.TaskEntity", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_checklists_tasks_task_id");
-
                     b.HasOne("RelMa.Domain.WorkOrders.WorkOrderEntity", "WorkOrder")
                         .WithMany("Checklists")
                         .HasForeignKey("WorkOrderId")
@@ -1093,7 +1339,32 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_checklists_work_orders_work_order_id");
 
-                    b.Navigation("Task");
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.Files.FileEntity", b =>
+                {
+                    b.HasOne("RelMa.Domain.Assets.AssetEntity", "Asset")
+                        .WithMany("Files")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_files_assets_asset_id");
+
+                    b.HasOne("RelMa.Domain.Requests.RequestEntity", "Request")
+                        .WithMany("Files")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_files_requests_request_id");
+
+                    b.HasOne("RelMa.Domain.WorkOrders.WorkOrderEntity", "WorkOrder")
+                        .WithMany("Files")
+                        .HasForeignKey("WorkOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_files_work_orders_work_order_id");
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Request");
 
                     b.Navigation("WorkOrder");
                 });
@@ -1109,35 +1380,28 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("RelMa.Domain.Maintenances.MaintenanceEntity", b =>
-                {
-                    b.HasOne("RelMa.Domain.Assets.AssetEntity", "Asset")
-                        .WithMany()
-                        .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_maintenances_assets_asset_id");
-
-                    b.Navigation("Asset");
-                });
-
             modelBuilder.Entity("RelMa.Domain.Parts.PartEntity", b =>
                 {
+                    b.HasOne("RelMa.Domain.Assets.AssetEntity", null)
+                        .WithMany("Parts")
+                        .HasForeignKey("AssetEntityId")
+                        .HasConstraintName("fk_parts_assets_asset_entity_id");
+
                     b.HasOne("RelMa.Domain.Locations.LocationEntity", "Location")
-                        .WithMany("Items")
+                        .WithMany("Parts")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_parts_locations_location_id");
 
                     b.HasOne("RelMa.Domain.Materials.MaterialEntity", "Material")
-                        .WithMany("Items")
+                        .WithMany("Parts")
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_parts_materials_material_id");
 
                     b.HasOne("RelMa.Domain.Storages.StorageEntity", "Storage")
-                        .WithMany("Items")
+                        .WithMany("Parts")
                         .HasForeignKey("StorageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_parts_storages_storage_id");
@@ -1169,8 +1433,9 @@ namespace RelMa.Infrastructure.Database.Migrations
             modelBuilder.Entity("RelMa.Domain.Storages.StorageEntity", b =>
                 {
                     b.HasOne("RelMa.Domain.Locations.LocationEntity", "Location")
-                        .WithMany()
+                        .WithMany("Storages")
                         .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_storages_locations_location_id");
 
                     b.Navigation("Location");
@@ -1185,16 +1450,29 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_tasks_assets_asset_id");
 
+                    b.HasOne("RelMa.Domain.Checklists.ChecklistEntity", "Checklist")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ChecklistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_tasks_checklists_checklist_id");
+
                     b.HasOne("RelMa.Domain.WorkOrders.WorkOrderEntity", null)
                         .WithMany("Tasks")
                         .HasForeignKey("WorkOrderEntityId")
                         .HasConstraintName("fk_tasks_work_orders_work_order_entity_id");
 
                     b.Navigation("Asset");
+
+                    b.Navigation("Checklist");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Teams.TeamEntity", b =>
                 {
+                    b.HasOne("RelMa.Domain.Assets.AssetEntity", null)
+                        .WithMany("Teams")
+                        .HasForeignKey("AssetEntityId")
+                        .HasConstraintName("fk_teams_assets_asset_entity_id");
+
                     b.HasOne("RelMa.Domain.Users.UserEntity", "Leader")
                         .WithMany()
                         .HasForeignKey("LeaderId")
@@ -1207,6 +1485,12 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("RelMa.Domain.WorkOrders.WorkOrderEntity", b =>
                 {
+                    b.HasOne("RelMa.Domain.Users.UserEntity", "Assignee")
+                        .WithMany("WorkOrders")
+                        .HasForeignKey("AssigneeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_work_orders_users_assignee_id");
+
                     b.HasOne("RelMa.Domain.Maintenances.MaintenanceEntity", "Maintenance")
                         .WithOne("WorkOrder")
                         .HasForeignKey("RelMa.Domain.WorkOrders.WorkOrderEntity", "MaintenanceId")
@@ -1218,6 +1502,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasForeignKey("RelMa.Domain.WorkOrders.WorkOrderEntity", "RequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_work_orders_requests_request_id");
+
+                    b.Navigation("Assignee");
 
                     b.Navigation("Maintenance");
 
@@ -1260,8 +1546,21 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("RelMa.Domain.Assets.AssetEntity", b =>
                 {
+                    b.Navigation("AssetLogs");
+
+                    b.Navigation("Files");
+
+                    b.Navigation("Parts");
+
                     b.Navigation("Requests");
 
+                    b.Navigation("Tasks");
+
+                    b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.Checklists.ChecklistEntity", b =>
+                {
                     b.Navigation("Tasks");
                 });
 
@@ -1271,7 +1570,9 @@ namespace RelMa.Infrastructure.Database.Migrations
 
                     b.Navigation("Children");
 
-                    b.Navigation("Items");
+                    b.Navigation("Parts");
+
+                    b.Navigation("Storages");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Maintenances.MaintenanceEntity", b =>
@@ -1279,29 +1580,33 @@ namespace RelMa.Infrastructure.Database.Migrations
                     b.Navigation("WorkOrder");
                 });
 
-            modelBuilder.Entity("RelMa.Domain.Manufacturers.ManufacturerEntity", b =>
-                {
-                    b.Navigation("Assets");
-                });
-
             modelBuilder.Entity("RelMa.Domain.Materials.MaterialEntity", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Parts");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Requests.RequestEntity", b =>
                 {
+                    b.Navigation("Files");
+
                     b.Navigation("WorkOrder");
                 });
 
             modelBuilder.Entity("RelMa.Domain.Storages.StorageEntity", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Parts");
+                });
+
+            modelBuilder.Entity("RelMa.Domain.Users.UserEntity", b =>
+                {
+                    b.Navigation("WorkOrders");
                 });
 
             modelBuilder.Entity("RelMa.Domain.WorkOrders.WorkOrderEntity", b =>
                 {
                     b.Navigation("Checklists");
+
+                    b.Navigation("Files");
 
                     b.Navigation("Parts");
 

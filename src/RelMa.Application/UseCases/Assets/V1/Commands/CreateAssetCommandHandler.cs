@@ -22,13 +22,13 @@ public sealed class CreateAssetCommandHandler(
             Name = command.Name,
             LocationId = command.LocationId,
             Area = command.Area,
-            Barcode = command.Barcode,
+            SerialNumber = command.Barcode,
             Category = command.Category,
             Description = command.Description,
-            ManufacturerId = command.ManufacturerId,
             Model = command.Model,
-            SerialNumber = command.SerialNumber,
-            Images = command.Images
+            Code = command.SerialNumber,
+            Images = command.Images,
+            Status = Status.Open,
         };
 
         unitOfWork.Repository<AssetEntity, DefaultIdType>().Add(entity);

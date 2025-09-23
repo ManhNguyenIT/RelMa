@@ -13,21 +13,19 @@ public sealed class GetAssetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler
     public async Task<Shared.PagedResult<AssetResponse>> Handle(GetAssetQuery request, CancellationToken cancellationToken)
     {
         var query = unitOfWork.Repository<AssetEntity, DefaultIdType>()
-            .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Location).Include(i => i.Manufacturer))
+            .Find(x => !x.IsDeleted, include: x => x.Include(i => i.Location))
             .Select(x => new AssetResponse()
             {
                 Id = x.Id,
                 Name = x.Name,
                 Area = x.Area,
                 LocationId = x.LocationId,
-                Barcode = x.Barcode,
+                Code = x.SerialNumber,
                 Category = x.Category,
                 Description = x.Description,
-                ManufacturerId = x.ManufacturerId,
                 Model = x.Model,
-                SerialNumber = x.SerialNumber,
+                SerialNumber = x.Code,
                 Location = x.Location == null ? null : new Locations.V1.Responses.LocationResponse() { Id = x.Location.Id, Name = x.Location.Name, },
-                Manufacturer = x.Manufacturer == null ? null : new Manufacturers.V1.Responses.ManufacturerResponse() { Id = x.Manufacturer.Id, Name = x.Manufacturer.Name, },
             });
 
         if (request.Includes?.Length > 0)

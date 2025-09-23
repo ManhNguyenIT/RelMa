@@ -13,8 +13,16 @@ internal sealed class WorkOrderEntityConfiguration : IEntityTypeConfiguration<Wo
         builder.Property(t => t.Id)
             .ValueGeneratedNever();
 
+        builder.Property(t => t.No)
+            .HasMaxLength(3);
+
         builder.Property(t => t.TenantId)
             .HasMaxLength(36);
+
+        builder.HasOne(t => t.Request)
+            .WithOne(t => t.WorkOrder)
+            .HasForeignKey<WorkOrderEntity>(t => t.RequestId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.Maintenance)
             .WithOne(t => t.WorkOrder)
@@ -25,6 +33,12 @@ internal sealed class WorkOrderEntityConfiguration : IEntityTypeConfiguration<Wo
             .WithOne(t => t.WorkOrder)
             .HasForeignKey<WorkOrderEntity>(t => t.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(t => t.Assignee)
+            .WithMany(t => t.WorkOrders)
+            .HasForeignKey(t => t.AssigneeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }
 

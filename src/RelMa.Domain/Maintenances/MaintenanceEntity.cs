@@ -6,7 +6,13 @@ namespace RelMa.Domain.Maintenances;
 
 public class MaintenanceEntity : Entity<DefaultIdType>
 {
-    public required DefaultIdType AssetId { get; set; }
-    public virtual AssetEntity? Asset { get; set; }
+    public MaintenanceEntity()
+    {
+        Assets = new HashSet<AssetEntity>();
+    }
+    public required DefaultIdType WorkOrderId { get; set; }
+    public required string CronExpression { get; set; }
+    public string[]? Images { get; set; }
     public virtual WorkOrderEntity? WorkOrder { get; set; }
+    public virtual ICollection<AssetEntity>? Assets { get; init; }
 }

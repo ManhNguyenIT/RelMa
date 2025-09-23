@@ -30,6 +30,21 @@ internal sealed class FileEntityConfiguration : IEntityTypeConfiguration<FileEnt
         builder.Property(t => t.Source)
             .IsRequired()
             .HasMaxLength(250);
+
+        builder.HasOne(t => t.Asset)
+            .WithMany(t => t.Files)
+            .HasForeignKey(t => t.AssetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(t => t.Request)
+            .WithMany(t => t.Files)
+            .HasForeignKey(t => t.RequestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(t => t.WorkOrder)
+            .WithMany(t => t.Files)
+            .HasForeignKey(t => t.WorkOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

@@ -10,10 +10,11 @@ public class SetEntity : Entity<DefaultIdType>
         Parts = new HashSet<PartEntity>();
     }
     public required string Name { get; set; }
+    public decimal TotalCost => Parts.Sum(s => s.Cost);
     public virtual ICollection<PartEntity> Parts { get; private set; }
 
-    public void AddParts(IEnumerable<PartEntity> parts)
+    public void SetParts(ICollection<PartEntity> parts)
     {
-        Parts = [.. parts];
+        Parts = parts;
     }
 }

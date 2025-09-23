@@ -4,4 +4,6 @@ using RelMa.Shared.Abstractions.Query;
 
 namespace RelMa.Application.UseCases.WorkOrders.V1.Queries;
 
-public sealed class GetWorkOrderQuery : PaginationQuery, IQuery<Shared.PagedResult<WorkOrderResponse>>;
+public sealed class GetWorkOrderQuery : PaginationQuery, IQuery<Shared.PagedResult<WorkOrderResponse>>
+{
+}

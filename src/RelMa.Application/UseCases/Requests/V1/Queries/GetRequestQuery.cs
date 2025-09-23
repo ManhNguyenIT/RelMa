@@ -4,4 +4,6 @@ using RelMa.Shared.Abstractions.Query;
 
 namespace RelMa.Application.UseCases.Requests.V1.Queries;
 
-public sealed class GetRequestQuery : PaginationQuery, IQuery<Shared.PagedResult<RequestResponse>>;
+public sealed class GetRequestQuery : PaginationQuery, IQuery<Shared.PagedResult<RequestResponse>>
+{
+}

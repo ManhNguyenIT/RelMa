@@ -31,12 +31,6 @@ internal sealed class RequestEndpoint : IEndpoint
         route.MapPost(string.Empty, Create)
             .AllowAnonymous();
 
-        route.MapPut("{id}/accept", Accept)
-            .RequireAuthorization();
-
-        route.MapPut("{id}/reject", Reject)
-            .RequireAuthorization();
-
         route.MapPut(string.Empty, Update)
             .RequireAuthorization();
 
@@ -59,42 +53,6 @@ internal sealed class RequestEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Accept(
-        DefaultIdType id,
-        IMediator mediator,
-        IUserContext userContext,
-        IDistributedCache cache,
-        IConnectionMultiplexer multiplexer,
-        IOptions<RedisCacheOptions> options,
-        CancellationToken cancellationToken)
-    {
-        var result = await mediator.SendCommandAsync<AcceptRequestCommand, DefaultIdType>(new AcceptRequestCommand(id), cancellationToken);
-        string[] patterns =
-        [
-            $"{userContext.TenantId}:requests",
-        ];
-        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Reject(
-        DefaultIdType id,
-        IMediator mediator,
-        IUserContext userContext,
-        IDistributedCache cache,
-        IConnectionMultiplexer multiplexer,
-        IOptions<RedisCacheOptions> options,
-        CancellationToken cancellationToken)
-    {
-        var result = await mediator.SendCommandAsync<RejectRequestCommand, DefaultIdType>(new RejectRequestCommand(id), cancellationToken);
-        string[] patterns =
-        [
-            $"{userContext.TenantId}:requests",
-        ];
-        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
     }
 

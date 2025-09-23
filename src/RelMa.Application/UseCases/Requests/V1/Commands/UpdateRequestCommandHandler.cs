@@ -1,5 +1,6 @@
 ﻿using Cortex.Mediator.Commands;
 using RelMa.Application.Abstractions.Database;
+using RelMa.Domain.Assets;
 using RelMa.Domain.Requests;
 using RelMa.Shared.Exceptions;
 
@@ -13,12 +14,22 @@ public class UpdateRequestCommandHandler(IUnitOfWork unitOfWork) : ICommandHandl
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
             ?? throw new NotFoundException($"Request with Id '{command.Id}' not found");
 
-        entity.AssetId = command.AssetId;
-        entity.Description = command.Description;
-        entity.Image = command.Image;
-        entity.Priority = command.Priority;
-        entity.Status = command.Status;
+        if (entity.AssetId != command.AssetId)
+        {
+            var asset = await unitOfWork.Repository<AssetEntity, DefaultIdType>()
+                .FindByIdAsync(command.AssetId, cancellationToken: cancellationToken)
+                ?? throw new NotFoundException($"Asset with Id '{command.AssetId}' not found.");
+
+            entity.AssetId = asset.Id;
+            entity.TenantId = asset.TenantId;
+        }
+
         entity.Title = command.Title;
+        entity.Description = command.Description;
+        entity.Status = command.Status;
+        entity.Category = command.Category;
+        entity.Priority = command.Priority;
+        entity.Images = command.Images;
 
         unitOfWork.Repository<RequestEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -7,14 +7,17 @@ public class MaterialEntity : Entity<DefaultIdType>
 {
     public MaterialEntity()
     {
-        Items = new HashSet<PartEntity>();
+        Parts = new HashSet<PartEntity>();
     }
     public required string Name { get; set; }
+    public required string Code { get; set; }
     public string? Description { get; set; }
-    public string? Image { get; set; }
-    public int MinQty { get; set; }
-    public int AvailableQty { get; set; }
-    public int IncomingQty { get; set; }
-    public int AllocatedQty { get; set; }
-    public virtual ICollection<PartEntity> Items { get; }
+    public string[]? Images { get; set; }
+    public Status Status { get; set; }
+    public int Available => Parts.Sum(s => s.Quantity);
+    public int Allocated { get; set; }
+    public int OnHand { get; set; }
+    public int Incoming { get; set; }
+    public int Minimum { get; set; }
+    public virtual ICollection<PartEntity> Parts { get; init; }
 }

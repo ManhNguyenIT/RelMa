@@ -9,7 +9,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
 using System.Globalization;
-using System.Threading;
 
 namespace RelMa.Infrastructure.Services;
 internal sealed class ImageService(
@@ -20,8 +19,8 @@ internal sealed class ImageService(
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
     private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
     private const int MaxFileSizeBytes = 10 * 1024 * 1024;
-    private const string OriginalsPath = "statics/originals";
-    private const string ThumbnailsPath = "statics/thumbnails";
+    private const string OriginalsPath = "assets/images/originals";
+    private const string ThumbnailsPath = "assets/images/thumbnails";
 
     private static bool IsValidImage(IFormFile file, out string? error)
     {
@@ -55,7 +54,10 @@ internal sealed class ImageService(
         CancellationToken cancellationToken = default)
     {
         var folderPath = Path.Combine(environment.ContentRootPath, OriginalsPath);
-        Directory.CreateDirectory(folderPath);
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
 
         if (!IsValidImage(file, out var error))
         {
@@ -90,7 +92,10 @@ internal sealed class ImageService(
     {
         widths ??= DefaultThumbnailWidths;
         var folderPath = Path.Combine(environment.ContentRootPath, ThumbnailsPath);
-        Directory.CreateDirectory(folderPath);
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
 
         var originalPath = Path.Combine(environment.ContentRootPath, OriginalsPath, file);
         if (!File.Exists(originalPath))
