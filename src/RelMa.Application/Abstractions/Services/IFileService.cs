@@ -9,5 +9,4 @@ public interface IFileService
     Task<MemoryStream> DownloadFilesAsync(string[] files, CancellationToken cancellationToken = default);
     Task<IEnumerable<string>> GetFilesAsync(string? prefix = null, string? pattern = null, string[]? extensions = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<string>> UploadFilesAsync(IFormFileCollection files, CancellationToken cancellationToken = default);
-    long ParseFileSize(string fileSize);
 }

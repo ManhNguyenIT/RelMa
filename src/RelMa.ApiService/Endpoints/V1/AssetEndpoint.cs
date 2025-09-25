@@ -149,17 +149,19 @@ internal sealed class AssetEndpoint : IEndpoint
         return Results.Ok();
     }
 
-    public static async Task<IResult> Export()
+    public static async Task<IResult> Export([FromQuery] string fileName)
     {
         await Task.CompletedTask;
         using var stream = new MemoryStream();
-        return Results.File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "assets_exported.xlsx");
+        stream.Position = 0;
+        return Results.File(stream, "application/octet-stream", fileName);
     }
 
-    public static async Task<IResult> Template()
+    public static async Task<IResult> Template([FromQuery] string fileName)
     {
         await Task.CompletedTask;
         using var stream = new MemoryStream();
-        return Results.File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "assets_template.xlsx");
+        stream.Position = 0;
+        return Results.File(stream, "application/octet-stream", fileName);
     }
 }
