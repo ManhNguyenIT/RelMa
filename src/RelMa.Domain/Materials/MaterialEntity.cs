@@ -19,5 +19,10 @@ public class MaterialEntity : Entity<DefaultIdType>
     public int OnHand { get; set; }
     public int Incoming { get; set; }
     public int Minimum { get; set; }
-    public virtual ICollection<PartEntity> Parts { get; init; }
+    public virtual ICollection<PartEntity> Parts { get; private set; }
+
+    public void SetParts(ICollection<PartEntity> parts)
+    {
+        Parts = parts;
+    }
 }

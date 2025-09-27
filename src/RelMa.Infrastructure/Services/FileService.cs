@@ -92,9 +92,9 @@ internal sealed class FileService(IMinioClient minioClient, IUserContext userCon
                 await minioClient.GetObjectAsync(new GetObjectArgs()
                     .WithBucket(fileConfig.TargetBucket)
                     .WithObject(files[0])
-                    .WithCallbackStream(async stream =>
+                    .WithCallbackStream(async (stream, token) =>
                     {
-                        await stream.CopyToAsync(memoryStream, cancellationToken);
+                        await stream.CopyToAsync(memoryStream, token);
                     }), cancellationToken);
 
                 memoryStream.Position = 0;

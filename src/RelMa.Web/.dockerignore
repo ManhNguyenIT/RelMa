@@ -1,0 +1,34 @@
+# Ignore IDE/editor config
+**/.classpath
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/*.*proj.user
+
+# Ignore Git
+**/.git
+**/.gitignore
+
+# Ignore Docker config
+**/.dockerignore
+**/docker-compose*
+**/compose*
+
+# Ignore Node/npm artifacts
+**/node_modules
+**/npm-debug.log
+
+# Ignore build artifacts
+**/obj
+**/*.dbmdl
+**/*.jfm
+
+# Ignore secrets or config values (be cautious)
+**/secrets.dev.yaml
+**/values.dev.yaml
+
+# Optional: Docs and metadata (if not used in build)
+LICENSE
+README.md
