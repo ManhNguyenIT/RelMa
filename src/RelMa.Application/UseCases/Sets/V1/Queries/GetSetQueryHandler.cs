@@ -38,7 +38,8 @@ public sealed class GetSetQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<G
                                 Material = p.Material == null || p.Material.IsDeleted ? null : new Materials.V1.Responses.MaterialResponse()
                                 {
                                     Id = p.Material.Id,
-                                    Name = p.Material.Name
+                                    Code = p.Material.Code,
+                                    Name = p.Material.Name,
                                 }
                             })
                     });

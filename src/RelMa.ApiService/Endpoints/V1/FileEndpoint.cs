@@ -40,7 +40,7 @@ internal sealed class FileEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         using var stream = await mediator.SendQueryAsync<DownloadFileQuery, MemoryStream>(query, cancellationToken);
-        stream.Position = 0; 
+        stream.Position = 0;
         return Results.File(stream, "application/octet-stream", query.FileName);
     }
 }

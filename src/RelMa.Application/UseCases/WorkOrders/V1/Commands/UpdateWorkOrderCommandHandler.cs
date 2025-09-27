@@ -1,6 +1,5 @@
 ﻿using Cortex.Mediator.Commands;
 using RelMa.Application.Abstractions.Database;
-using RelMa.Domain.Assets;
 using RelMa.Domain.WorkOrders;
 using RelMa.Shared.Exceptions;
 

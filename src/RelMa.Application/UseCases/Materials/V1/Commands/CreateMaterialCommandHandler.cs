@@ -1,7 +1,6 @@
 ﻿using Cortex.Mediator.Commands;
 using Microsoft.EntityFrameworkCore;
 using RelMa.Application.Abstractions.Database;
-using RelMa.Domain.Assets;
 using RelMa.Domain.Materials;
 using RelMa.Domain.Parts;
 using RelMa.Shared.Exceptions;
@@ -24,9 +23,10 @@ public sealed class CreateMaterialCommandHandler(IUnitOfWork unitOfWork) : IComm
             Description = command.Description,
             Images = command.Images,
             Status = command.Status,
-            Parts = await unitOfWork.Repository<PartEntity, DefaultIdType>()
-                .Find(x => !x.IsDeleted && command.Parts.Contains(x.Id)).ToListAsync(cancellationToken),
         };
+
+        entity.SetParts(await unitOfWork.Repository<PartEntity, DefaultIdType>()
+                .Find(x => !x.IsDeleted && command.Parts.Contains(x.Id)).ToListAsync(cancellationToken));
 
         unitOfWork.Repository<MaterialEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);

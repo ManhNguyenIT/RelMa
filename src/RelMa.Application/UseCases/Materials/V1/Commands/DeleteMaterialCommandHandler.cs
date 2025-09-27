@@ -11,7 +11,7 @@ public sealed class DeleteMaterialCommandHandler(IUnitOfWork unitOfWork) : IComm
     {
         var entity = await unitOfWork.Repository<MaterialEntity, DefaultIdType>()
             .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
-            ?? throw new NotFoundException($"Asset with Id '{command.Id}' not found");
+            ?? throw new NotFoundException($"Material with Id '{command.Id}' not found");
 
         entity.Delete();
         unitOfWork.Repository<MaterialEntity, DefaultIdType>().Update(entity);
