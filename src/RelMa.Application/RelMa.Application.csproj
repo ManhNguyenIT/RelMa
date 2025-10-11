@@ -6,6 +6,7 @@
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+		<PackageReference Include="NPOI" />
 	</ItemGroup>
 
 	<ItemGroup>

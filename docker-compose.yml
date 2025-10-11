@@ -13,23 +13,19 @@ services:
     build:
       context: .
       dockerfile: src/RelMa.ApiService/Dockerfile
-    ports:
-      - 8081:8080
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-    volumes:
-      - ./.backup/api/statics:/app/statics
     depends_on:
       - aspire-dashboard
 
-  relma.web-app:
-    container_name: relma.web-app
-    image: ${DOCKER_REGISTRY-}relma.web-app
-    build:
-      context: ./src/RelMa.Web
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - relma.api-service
+  # relma.web-app:
+  #   container_name: relma.web-app
+  #   image: ${DOCKER_REGISTRY-}relma.web-app
+  #   build:
+  #     context: ./src/RelMa.Web
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - relma.api-service

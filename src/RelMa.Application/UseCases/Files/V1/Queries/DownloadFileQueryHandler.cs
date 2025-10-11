@@ -4,14 +4,15 @@ using RelMa.Application.Abstractions.Database;
 using RelMa.Application.Abstractions.Services;
 using RelMa.Domain.Files;
 using RelMa.Shared.Exceptions;
+using System.IO.Pipelines;
 
 namespace RelMa.Application.UseCases.Files.V1.Queries;
 
 public sealed class DownloadFileQueryHandler(
     IUnitOfWork unitOfWork,
-    IFileService fileService) : IQueryHandler<DownloadFileQuery, MemoryStream>
+    IFileService fileService) : IQueryHandler<DownloadFileQuery, PipeReader>
 {
-    public async Task<MemoryStream> Handle(DownloadFileQuery request, CancellationToken cancellationToken)
+    public async Task<PipeReader> Handle(DownloadFileQuery request, CancellationToken cancellationToken)
     {
         var entities = await unitOfWork.Repository<FileEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && request.Ids.Contains(x.Id))

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RelMa.ApiService.Abstractions;
 using RelMa.Application.UseCases.Files.V1.Commands;
 using RelMa.Application.UseCases.Files.V1.Queries;
+using System.IO.Pipelines;
 
 namespace RelMa.ApiService.Endpoints.V1;
 
@@ -39,8 +40,7 @@ internal sealed class FileEndpoint : IEndpoint
         [AsParameters] DownloadFileQuery query,
         CancellationToken cancellationToken)
     {
-        using var stream = await mediator.SendQueryAsync<DownloadFileQuery, MemoryStream>(query, cancellationToken);
-        stream.Position = 0;
-        return Results.File(stream, "application/octet-stream", query.FileName);
+        var reader = await mediator.SendQueryAsync<DownloadFileQuery, PipeReader>(query, cancellationToken);
+        return Results.File(reader.AsStream(), "application/octet-stream", query.FileName);
     }
 }

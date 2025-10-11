@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Services;
-using System.IO.Compression;
+using System.IO.Pipelines;
 
 namespace RelMa.Infrastructure.Services;
 
@@ -76,7 +77,7 @@ internal sealed class FileService(IMinioClient minioClient, IUserContext userCon
         await Task.WhenAll(tasks);
     }
 
-    public async Task<MemoryStream> DownloadFilesAsync(string[] files, CancellationToken cancellationToken = default)
+    public async Task<PipeReader> DownloadFilesAsync(string[] files, CancellationToken cancellationToken = default)
     {
         if (files == null || files.Length == 0)
             throw new ArgumentException("No files specified.", nameof(files));
@@ -84,65 +85,71 @@ internal sealed class FileService(IMinioClient minioClient, IUserContext userCon
         var fileConfig = await userContext.GetFileConfig()
             ?? throw new InvalidOperationException($"File config not found.");
 
-        if (files.Length == 1)
+        var pipe = new Pipe(new PipeOptions(minimumSegmentSize: 81920));
+        var writer = pipe.Writer;
+
+        try
         {
-            var memoryStream = new MemoryStream();
-            try
+            if (files.Length == 1)
             {
                 await minioClient.GetObjectAsync(new GetObjectArgs()
                     .WithBucket(fileConfig.TargetBucket)
                     .WithObject(files[0])
                     .WithCallbackStream(async (stream, token) =>
                     {
-                        await stream.CopyToAsync(memoryStream, token);
+                        byte[] buffer = new byte[81920];
+                        int bytesRead;
+                        while ((bytesRead = await stream.ReadAsync(buffer, token)) > 0)
+                        {
+                            await writer.WriteAsync(buffer.AsMemory(0, bytesRead), token);
+                        }
                     }), cancellationToken);
-
-                memoryStream.Position = 0;
-                return memoryStream;
+                await writer.FlushAsync(cancellationToken);
+                await writer.CompleteAsync();
             }
-            catch
+            else
             {
-                await memoryStream.DisposeAsync();
-                throw;
-            }
-        }
+                await using var zipOutputStream = new ZipOutputStream(pipe.Writer.AsStream());
+                zipOutputStream.SetLevel(1);
 
-        var zipStream = new MemoryStream();
-        try
-        {
-            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true);
-            using var semaphore = new SemaphoreSlim(10);
-            foreach (var file in files)
-            {
-                await semaphore.WaitAsync(cancellationToken);
-                try
+                foreach (var file in files)
                 {
                     var fileName = Path.GetFileName(file);
-                    var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
+                    var entry = new ZipEntry(fileName)
+                    {
+                        DateTime = DateTime.Now,
+                        CompressionMethod = CompressionMethod.Deflated
+                    };
+                    await zipOutputStream.PutNextEntryAsync(entry, cancellationToken);
 
-                    await using var entryStream = entry.Open();
                     await minioClient.GetObjectAsync(new GetObjectArgs()
                         .WithBucket(fileConfig.TargetBucket)
                         .WithObject(file)
-                        .WithCallbackStream(async stream =>
+                        .WithCallbackStream(async (stream, token) =>
                         {
-                            await stream.CopyToAsync(entryStream, cancellationToken);
+                            byte[] buffer = new byte[81920];
+                            int bytesRead;
+                            while ((bytesRead = await stream.ReadAsync(buffer, token)) > 0)
+                            {
+                                await zipOutputStream.WriteAsync(buffer.AsMemory(0, bytesRead), token);
+                            }
                         }), cancellationToken);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }
 
-            zipStream.Position = 0;
-            return zipStream;
+                    zipOutputStream.CloseEntry();
+                }
+
+                zipOutputStream.Finish();
+                await writer.FlushAsync(cancellationToken);
+                await writer.CompleteAsync();
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            await zipStream.DisposeAsync();
+            await writer.CompleteAsync(ex);
             throw;
         }
+
+        return pipe.Reader;
     }
 
     public async Task<IEnumerable<string>> GetFilesAsync(string? prefix = null, string? pattern = null, string[]? extensions = null, CancellationToken cancellationToken = default)

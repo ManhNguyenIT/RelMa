@@ -7,6 +7,7 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 using System.Globalization;
 
@@ -16,8 +17,8 @@ internal sealed class ImageService(
     ILogger<ImageService> logger) : IImageService
 {
     private static readonly int[] DefaultThumbnailWidths = [32, 64, 128, 256, 512, 1024];
-    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
-    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     private const int MaxFileSizeBytes = 10 * 1024 * 1024;
     private const string OriginalsPath = "assets/images/originals";
     private const string ThumbnailsPath = "assets/images/thumbnails";
@@ -146,6 +147,7 @@ internal sealed class ImageService(
             ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestSpeed },
             ".jpg" or ".jpeg" => new JpegEncoder { Quality = 75 },
             ".gif" => new GifEncoder(),
+            ".webp" => new WebpEncoder { Quality = 75 },
             _ => throw new ArgumentException($"Unsupported image format: {ext}")
         };
     }

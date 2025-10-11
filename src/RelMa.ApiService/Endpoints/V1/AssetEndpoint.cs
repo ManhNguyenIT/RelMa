@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
+using MimeKit;
 using RelMa.ApiService.Abstractions;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Jobs;
@@ -28,6 +29,9 @@ internal sealed class AssetEndpoint : IEndpoint
             .HasApiVersion(1.0);
 
         route.MapGet(string.Empty, List)
+            .RequireAuthorization();
+
+        route.MapGet("{id}", Info)
             .RequireAuthorization();
 
         route.MapPost(string.Empty, Create)
@@ -71,6 +75,24 @@ internal sealed class AssetEndpoint : IEndpoint
         return Results.Ok(result);
     }
 
+    public static async Task<IResult> Info(
+        DefaultIdType id,
+        IMediator mediator,
+        IDistributedCache cache,
+        IUserContext userContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await cache.GetOrCreateAsync(
+            key: $"{userContext.TenantId}:asset-info:{id}",
+            param: id,
+            factory: async token => await mediator.SendQueryAsync<GetAssetInfoQuery, AssetResponse>(new GetAssetInfoQuery(id), token),
+            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
+            cancellationToken: cancellationToken
+        );
+
+        return Results.Ok(result);
+    }
+
     public static async Task<IResult> Create(
         IMediator mediator,
         IUserContext userContext,
@@ -102,6 +124,7 @@ internal sealed class AssetEndpoint : IEndpoint
         string[] patterns =
         [
             $"{userContext.TenantId}:assets",
+            $"{userContext.TenantId}:asset-info:{command.Id}",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -149,19 +172,20 @@ internal sealed class AssetEndpoint : IEndpoint
         return Results.Ok();
     }
 
-    public static async Task<IResult> Export([FromQuery] string fileName)
+    public static async Task<IResult> Export(
+        IMediator mediator,
+        [AsParameters] ExportAssetQuery query)
     {
-        await Task.CompletedTask;
-        using var stream = new MemoryStream();
-        stream.Position = 0;
-        return Results.File(stream, "application/octet-stream", fileName);
+        var fileName = $"asset_exported_{DateTime.Now:yyyyMMdd}.xlsx";
+        var mimeType = MimeTypes.GetMimeType(fileName);
+        var stream = await mediator.SendQueryAsync<ExportAssetQuery, MemoryStream>(query);
+        return Results.File(stream, mimeType, Path.GetFileNameWithoutExtension(fileName), enableRangeProcessing: true);
     }
 
-    public static async Task<IResult> Template([FromQuery] string fileName)
+    public static IResult Template(IWebHostEnvironment environment)
     {
-        await Task.CompletedTask;
-        using var stream = new MemoryStream();
-        stream.Position = 0;
-        return Results.File(stream, "application/octet-stream", fileName);
+        string fileName = Path.Combine(environment.ContentRootPath, "assets", "templates", "asset.xlsx");
+        var mimeType = MimeTypes.GetMimeType(fileName);
+        return Results.File(fileName, mimeType, Path.GetFileNameWithoutExtension(fileName), enableRangeProcessing: true);
     }
 }
