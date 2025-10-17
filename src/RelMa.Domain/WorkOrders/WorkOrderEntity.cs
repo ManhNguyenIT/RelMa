@@ -30,7 +30,7 @@ public class WorkOrderEntity : Entity<DefaultIdType>
     public DefaultIdType? RequestId { get; set; }
     public DefaultIdType? MaintenanceId { get; set; }
     public string[]? Images { get; set; }
-    public string? AssigneeId { get; set; }
+    public DefaultIdType? AssigneeId { get; set; }
     public virtual UserEntity? Assignee { get; set; }
     public virtual RequestEntity? Request { get; set; }
     public virtual MaintenanceEntity? Maintenance { get; set; }

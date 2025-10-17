@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" />
 		<PackageReference Include="Cortex.Mediator" />
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-		<PackageReference Include="NPOI" />
 	</ItemGroup>
 
 	<ItemGroup>

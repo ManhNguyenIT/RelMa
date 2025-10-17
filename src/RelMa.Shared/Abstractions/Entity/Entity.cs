@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RelMa.Shared.Abstractions.Entity;
-public abstract class Entity<TKey> : AggregateRoot, IEntity<TKey>, IAuditable, ITenantTracking
+public abstract class Entity<TKey> : AggregateRoot, IEntity<TKey>, IAuditable<TKey>, ITenantTracking
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -10,11 +10,11 @@ public abstract class Entity<TKey> : AggregateRoot, IEntity<TKey>, IAuditable, I
     public string? TenantId { get; set; }
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? ModifiedAt { get; set; }
-    public string? CreatedBy { get; set; }
-    public string? ModifiedBy { get; set; }
+    public TKey? CreatedBy { get; set; }
+    public TKey? ModifiedBy { get; set; }
     public bool IsDeleted { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
-    public string? DeletedBy { get; set; }
+    public TKey? DeletedBy { get; set; }
 
     public void Delete()
     {
@@ -26,6 +26,6 @@ public abstract class Entity<TKey> : AggregateRoot, IEntity<TKey>, IAuditable, I
     {
         IsDeleted = false;
         DeletedAt = null;
-        DeletedBy = null;
+        DeletedBy = default;
     }
 }

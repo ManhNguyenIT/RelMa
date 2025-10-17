@@ -1,4 +1,4 @@
 ﻿namespace RelMa.Shared.Abstractions.Entity;
-public interface IAuditable : IDateTracking, IUserTracking, ISoftDelete
+public interface IAuditable<TKey> : IDateTracking, IUserTracking<TKey>, ISoftDelete<TKey>
 {
 }

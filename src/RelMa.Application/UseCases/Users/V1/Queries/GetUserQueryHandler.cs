@@ -11,7 +11,7 @@ public sealed class GetUserQueryHandler(IUnitOfWork unitOfWork) : IQueryHandler<
 {
     public async Task<Shared.PagedResult<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var query = unitOfWork.Repository<UserEntity, string>()
+        var query = unitOfWork.Repository<UserEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted)
             .Select(x => new UserResponse()
             {

@@ -23,7 +23,7 @@ internal sealed class MaintenanceEntityConfiguration : IEntityTypeConfiguration<
 
         builder.HasMany(t => t.Assets)
             .WithMany(t => t.Maintenances)
-            .UsingEntity<Dictionary<Guid, Guid>>(
+            .UsingEntity<Dictionary<DefaultIdType, DefaultIdType>>(
                 "AssetsAndMaintenances",
                 r => r.HasOne<AssetEntity>().WithMany().HasForeignKey("AssetId"),
                 l => l.HasOne<MaintenanceEntity>().WithMany().HasForeignKey("MaintenanceId"),

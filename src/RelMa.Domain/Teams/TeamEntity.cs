@@ -11,7 +11,12 @@ public class TeamEntity : Entity<DefaultIdType>
     }
     public required string Name { get; set; }
     public string? Description { get; set; }
-    public required string LeaderId { get; set; }
+    public required DefaultIdType LeaderId { get; set; }
     public virtual UserEntity? Leader { get; set; }
-    public virtual ICollection<UserEntity> Members { get; }
+    public virtual ICollection<UserEntity> Members { get; private set; }
+
+    public void SetMember(UserEntity[] members)
+    {
+        Members = members;
+    }
 }

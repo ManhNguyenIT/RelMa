@@ -50,7 +50,7 @@ internal sealed class ImageService(
         return true;
     }
 
-    public async Task<string> SaveImagesAsync(
+    public async Task<(DefaultIdType, string)> SaveImagesAsync(
         IFormFile file,
         CancellationToken cancellationToken = default)
     {
@@ -67,7 +67,8 @@ internal sealed class ImageService(
         }
 
         var ext = Path.GetExtension(file.FileName).ToLower(CultureInfo.CurrentCulture);
-        var fileName = $"{Guid.CreateVersion7()}{ext}";
+        var id = Guid.CreateVersion7();
+        var fileName = $"{id}{ext}";
         var filePath = Path.Combine(folderPath, fileName);
 
         try
@@ -75,7 +76,7 @@ internal sealed class ImageService(
             using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
             await file.CopyToAsync(stream, cancellationToken);
             logger.LogInformation("Saved image: {FilePath}", filePath);
-            return fileName;
+            return (id, fileName);
         }
         catch (IOException ex)
         {

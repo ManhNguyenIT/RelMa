@@ -297,7 +297,7 @@ public static class DependencyInjection
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = "DefaultScheme";
-            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
         .AddPolicyScheme("DefaultScheme", null, options =>
         {
@@ -334,6 +334,39 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true,
             };
 #pragma warning restore CA5404 // Do not disable token validation checks
+            options.Events = new JwtBearerEvents
+            {
+                OnChallenge = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogWarning("⚠️ JWT challenge triggered: {Error} - {ErrorDescription}", context.Error, context.ErrorDescription);
+                    return Task.CompletedTask;
+                },
+                OnForbidden = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogWarning("⛔ JWT access forbidden for user {Sub}", context.HttpContext.User?.FindFirst("sub")?.Value);
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogInformation("✅ JWT validated successfully for user {Sub}", context.Principal?.FindFirst("sub")?.Value);
+                    return Task.CompletedTask;
+                },
+                OnMessageReceived = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogInformation("🔑 JWT message received: {Message}", context.Token ?? "No token found");
+                    return Task.CompletedTask;
+                },
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogError(context.Exception, "❌ JWT validation failed: {Message}", context.Exception.Message);
+                    return Task.CompletedTask;
+                },
+            };
         })
         .AddOpenIdConnect(options =>
         {
@@ -369,8 +402,37 @@ public static class DependencyInjection
 
                     return Task.CompletedTask;
                 },
+                OnRemoteFailure = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OpenIdConnectEvents>>();
+                    logger.LogError(context.Failure, "❌ OIDC remote failure: {Message}", context.Failure?.Message);
+                    context.Response.Redirect("/");
+                    context.HandleResponse();
+                    return Task.CompletedTask;
+                },
+                OnUserInformationReceived = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OpenIdConnectEvents>>();
+                    logger.LogInformation("👤 OIDC user info received: {User}", context.User);
+                    return Task.CompletedTask;
+                },
+                OnTokenResponseReceived = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OpenIdConnectEvents>>();
+                    logger.LogInformation("🔐 OIDC token response received: {TokenResponse}", context.TokenEndpointResponse);
+                    return Task.CompletedTask;
+                },
+                OnMessageReceived = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OpenIdConnectEvents>>();
+                    logger.LogInformation("🔑 OIDC message received: {Message}", context.ProtocolMessage);
+                    return Task.CompletedTask;
+                },
                 OnTokenValidated = async context =>
                 {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogInformation("✅ JWT validated successfully for user {Sub}", context.Principal?.FindFirst("sub")?.Value);
+
                     var accessor = context.HttpContext.RequestServices.GetRequiredService<IHttpContextAccessor>();
                     if (accessor.HttpContext != null)
                     {
@@ -378,6 +440,12 @@ public static class DependencyInjection
                     }
                     var mediator = context.HttpContext.RequestServices.GetRequiredService<IMediator>();
                     await mediator.PublishAsync(new UserLoggedInEvent());
+                },
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                    logger.LogError(context.Exception, "❌ JWT validation failed: {Message}", context.Exception.Message);
+                    return Task.CompletedTask;
                 }
             };
         });

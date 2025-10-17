@@ -13,8 +13,8 @@ using RelMa.Infrastructure.Database;
 namespace RelMa.Infrastructure.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250923095225_AddSequences")]
-    partial class AddSequences
+    [Migration("20251017083159_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,16 +60,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -89,8 +89,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTimeOffset>("Started")
@@ -141,16 +141,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -183,8 +183,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -226,16 +226,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -250,8 +250,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -292,16 +292,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Ext")
@@ -318,8 +318,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -378,16 +378,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -402,8 +402,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -440,8 +440,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<string>("CronExpression")
@@ -454,8 +454,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.PrimitiveCollection<string[]>("Images")
@@ -470,8 +470,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("TenantId")
@@ -508,16 +508,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -545,8 +545,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -630,16 +630,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -670,8 +670,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<int>("Quantity")
@@ -734,16 +734,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -762,8 +762,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<int>("Priority")
@@ -835,16 +835,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
@@ -855,8 +855,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -886,16 +886,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -915,8 +915,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -957,16 +957,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
@@ -977,8 +977,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("TenantId")
@@ -1028,16 +1028,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -1048,17 +1048,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<string>("LeaderId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<Guid>("LeaderId")
+                        .HasColumnType("uuid")
                         .HasColumnName("leader_id");
 
                     b.Property<DateTimeOffset?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -1085,8 +1084,8 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("RelMa.Domain.Users.UserEntity", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<string>("Company")
@@ -1098,16 +1097,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
@@ -1118,8 +1117,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("Name")
@@ -1154,8 +1153,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("AssigneeId")
-                        .HasColumnType("text")
+                    b.Property<Guid?>("AssigneeId")
+                        .HasColumnType("uuid")
                         .HasColumnName("assignee_id");
 
                     b.Property<int>("Category")
@@ -1166,16 +1165,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("DeletedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -1202,8 +1201,8 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified_at");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text")
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
                     b.Property<string>("No")
@@ -1275,8 +1274,8 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("TeamsAndMembers", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.Property<Guid>("TeamId")

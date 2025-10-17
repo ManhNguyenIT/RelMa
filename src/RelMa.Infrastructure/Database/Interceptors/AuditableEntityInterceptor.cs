@@ -8,7 +8,7 @@ public sealed class AuditableEntityInterceptor(IUserContext userContext) : SaveC
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
-        foreach (var entry in eventData.Context?.ChangeTracker.Entries<IAuditable>() ?? [])
+        foreach (var entry in eventData.Context?.ChangeTracker.Entries<IAuditable<DefaultIdType>>() ?? [])
         {
             switch (entry.State)
             {

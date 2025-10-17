@@ -24,7 +24,7 @@ internal sealed class TeamEntityConfiguration : IEntityTypeConfiguration<TeamEnt
 
         builder.HasMany(t => t.Members)
             .WithMany(t => t.Teams)
-            .UsingEntity<Dictionary<string, Guid>>(
+            .UsingEntity<Dictionary<DefaultIdType, DefaultIdType>>(
                 "TeamsAndMembers",
                 r => r.HasOne<UserEntity>().WithMany().HasForeignKey("UserId"),
                 l => l.HasOne<TeamEntity>().WithMany().HasForeignKey("TeamId"),

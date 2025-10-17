@@ -8,6 +8,22 @@ namespace RelMa.Infrastructure.Extentions;
 
 public static class DistributedCacheExtensions
 {
+    public static async Task<T?> GetAsync<T>(
+        this IDistributedCache cache,
+        string key,
+        object? param = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (param is not null)
+        {
+            key = $"{key}:{JsonSerializer.Serialize(param)}";
+        }
+        var json = await cache.GetStringAsync(key, cancellationToken);
+        return string.IsNullOrWhiteSpace(json)
+            ? default
+            : JsonSerializer.Deserialize<T>(json);
+    }
+
     public static async Task<T?> GetOrCreateAsync<T>(
         this IDistributedCache cache,
         string key,
@@ -18,7 +34,7 @@ public static class DistributedCacheExtensions
     {
         if (param is not null)
         {
-            key = $"{key}-{JsonSerializer.Serialize(param)}";
+            key = $"{key}:{JsonSerializer.Serialize(param)}";
         }
         var json = await cache.GetStringAsync(key, cancellationToken);
         if (!string.IsNullOrWhiteSpace(json))

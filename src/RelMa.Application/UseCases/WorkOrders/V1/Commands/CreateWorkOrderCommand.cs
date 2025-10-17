@@ -14,5 +14,5 @@ public sealed record CreateWorkOrderCommand(
     DefaultIdType? RequestId,
     DefaultIdType? MaintenanceId,
     string[]? Images,
-    string? AssigneeId,
+    DefaultIdType? AssigneeId,
     DefaultIdType[] Files) : ICommand<DefaultIdType>;

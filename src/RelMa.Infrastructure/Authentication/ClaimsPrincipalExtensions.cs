@@ -4,12 +4,12 @@ namespace RelMa.Infrastructure.Authentication;
 
 internal static class ClaimsPrincipalExtensions
 {
-    public static string? GetUserId(this ClaimsPrincipal principal)
+    public static DefaultIdType? GetUserId(this ClaimsPrincipal principal)
     {
         if (principal?.Identity?.IsAuthenticated != true)
             return null;
 
-        return principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        return DefaultIdType.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty);
     }
 
     public static string[] GetTenantIds(this ClaimsPrincipal principal)

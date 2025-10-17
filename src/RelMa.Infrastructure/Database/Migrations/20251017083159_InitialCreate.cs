@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -26,11 +27,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,11 +57,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,11 +86,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,6 +115,21 @@ namespace RelMa.Infrastructure.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "sequences",
+                schema: "public",
+                columns: table => new
+                {
+                    seq_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
+                    table_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    current_value = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_sequences", x => new { x.seq_date, x.table_name, x.tenant_id });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "sets",
                 schema: "public",
                 columns: table => new
@@ -123,11 +139,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -139,7 +155,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "text", nullable: false),
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     username = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     company = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
@@ -147,11 +163,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -178,11 +194,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -208,11 +224,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -240,11 +256,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -302,11 +318,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -328,16 +344,16 @@ namespace RelMa.Infrastructure.Database.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
-                    leader_id = table.Column<string>(type: "text", nullable: false),
+                    leader_id = table.Column<Guid>(type: "uuid", nullable: false),
                     asset_entity_id = table.Column<Guid>(type: "uuid", nullable: true),
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -374,15 +390,15 @@ namespace RelMa.Infrastructure.Database.Migrations
                     request_id = table.Column<Guid>(type: "uuid", nullable: true),
                     maintenance_id = table.Column<Guid>(type: "uuid", nullable: true),
                     images = table.Column<string[]>(type: "text[]", nullable: true),
-                    assignee_id = table.Column<string>(type: "text", nullable: true),
+                    assignee_id = table.Column<Guid>(type: "uuid", nullable: true),
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -415,7 +431,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    user_id = table.Column<string>(type: "text", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     team_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -449,11 +465,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -483,11 +499,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -522,13 +538,13 @@ namespace RelMa.Infrastructure.Database.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     material_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false),
                     minimum = table.Column<int>(type: "integer", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
                     inventory = table.Column<int>(type: "integer", nullable: false),
                     cost = table.Column<decimal>(type: "numeric", nullable: false),
                     category = table.Column<string>(type: "text", nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
+                    status = table.Column<int>(type: "integer", nullable: false),
                     storage_id = table.Column<Guid>(type: "uuid", nullable: true),
                     location_id = table.Column<Guid>(type: "uuid", nullable: true),
                     asset_entity_id = table.Column<Guid>(type: "uuid", nullable: true),
@@ -536,11 +552,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -594,11 +610,11 @@ namespace RelMa.Infrastructure.Database.Migrations
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_by = table.Column<string>(type: "text", nullable: true),
-                    modified_by = table.Column<string>(type: "text", nullable: true),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    modified_by = table.Column<Guid>(type: "uuid", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    deleted_by = table.Column<string>(type: "text", nullable: true)
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -822,6 +838,10 @@ namespace RelMa.Infrastructure.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "outbox_messages",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "sequences",
                 schema: "public");
 
             migrationBuilder.DropTable(

@@ -1,6 +1,6 @@
 ﻿namespace RelMa.Shared.Abstractions.Entity;
-public interface IUserTracking
+public interface IUserTracking<TKey>
 {
-    string? CreatedBy { get; set; }
-    string? ModifiedBy { get; set; }
+    TKey? CreatedBy { get; set; }
+    TKey? ModifiedBy { get; set; }
 }

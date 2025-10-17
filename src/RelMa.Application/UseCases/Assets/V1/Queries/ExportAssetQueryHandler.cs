@@ -49,6 +49,7 @@ public sealed class ExportAssetQueryHandler(
             template: Path.Combine(environment.ContentRootPath, "assets", "templates", "asset.xlsx"),
             data: query.AsAsyncEnumerable(),
             startRow: 2,
+            sheetIndex: 1,
             cancellationToken: cancellationToken);
     }
 }

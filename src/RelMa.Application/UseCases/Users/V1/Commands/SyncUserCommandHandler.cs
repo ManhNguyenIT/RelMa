@@ -12,7 +12,7 @@ public class SyncUserCommandHandler(
 {
     public async Task<UserResponse> Handle(SyncUserCommand command, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<UserEntity, string>()
+        var entity = await unitOfWork.Repository<UserEntity, DefaultIdType>()
             .FindByIdAsync(userContext.UserId, cancellationToken: cancellationToken);
 
         if (entity is null)
@@ -23,13 +23,13 @@ public class SyncUserCommandHandler(
                 Name = userContext.Name,
                 Username = userContext.Username
             };
-            unitOfWork.Repository<UserEntity, string>().Add(entity);
+            unitOfWork.Repository<UserEntity, DefaultIdType>().Add(entity);
         }
         else
         {
             entity.Name = userContext.Name;
             entity.Username = userContext.Username;
-            unitOfWork.Repository<UserEntity, string>().Update(entity);
+            unitOfWork.Repository<UserEntity, DefaultIdType>().Update(entity);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

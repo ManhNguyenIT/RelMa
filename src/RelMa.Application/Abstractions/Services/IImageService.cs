@@ -4,7 +4,7 @@ namespace RelMa.Application.Abstractions.Services;
 
 public interface IImageService
 {
-    Task<string> SaveImagesAsync(
+    Task<(DefaultIdType, string)> SaveImagesAsync(
         IFormFile file,
         CancellationToken cancellationToken = default);
     Task GenerateThumbnailsAsync(

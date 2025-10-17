@@ -25,7 +25,7 @@ public class WorkOrderResponse
     public Priority Priority { get; set; }
     public Category Category { get; set; }
     public TimeSpan? Estimate { get; set; }
-    public string? AssigneeId { get; set; }
+    public DefaultIdType? AssigneeId { get; set; }
     public DefaultIdType? RequestId { get; set; }
     public DefaultIdType? MaintenanceId { get; set; }
     public string[]? Images { get; set; }

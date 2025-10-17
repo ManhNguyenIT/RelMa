@@ -4,7 +4,7 @@ using RelMa.Shared.Abstractions.Entity;
 
 namespace RelMa.Domain.Users;
 
-public class UserEntity : Entity<string>
+public class UserEntity : Entity<DefaultIdType>
 {
     public UserEntity()
     {

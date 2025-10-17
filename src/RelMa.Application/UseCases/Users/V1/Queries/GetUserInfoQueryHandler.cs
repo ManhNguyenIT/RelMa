@@ -13,7 +13,7 @@ public sealed class GetUserInfoQueryHandler(
 {
     public async Task<UserResponse> Handle(GetUserInfoQuery query, CancellationToken cancellationToken)
     {
-        var entity = await unitOfWork.Repository<UserEntity, string>()
+        var entity = await unitOfWork.Repository<UserEntity, DefaultIdType>()
             .FindByIdAsync(userContext.UserId, cancellationToken: cancellationToken)
             ?? throw new NotFoundException("User not found");
 
