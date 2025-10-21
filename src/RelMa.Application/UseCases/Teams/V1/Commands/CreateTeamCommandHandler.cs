@@ -4,7 +4,6 @@ using RelMa.Application.Abstractions.Database;
 using RelMa.Domain.Teams;
 using RelMa.Domain.Users;
 using RelMa.Shared.Exceptions;
-using System.Linq;
 
 namespace RelMa.Application.UseCases.Teams.V1.Commands;
 

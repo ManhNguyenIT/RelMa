@@ -1,20 +1,21 @@
 ﻿using Cortex.Mediator.Commands;
+using Microsoft.EntityFrameworkCore;
+using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
 using RelMa.Domain.Sets;
-using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Sets.V1.Commands;
 
-public class DeleteSetCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<DeleteSetCommand, bool>
+public class DeleteSetCommandHandler(
+    IUnitOfWork unitOfWork,
+    IUserContext userContext) : ICommandHandler<DeleteSetCommand, bool>
 {
     public async Task<bool> Handle(DeleteSetCommand command, CancellationToken cancellationToken)
-    {
-        var entity = await unitOfWork.Repository<SetEntity, DefaultIdType>()
-            .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
-            ?? throw new NotFoundException($"Set with Id '{command.Id}' not found");
-
-        entity.Delete();
-        unitOfWork.Repository<SetEntity, DefaultIdType>().Update(entity);
-        return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
-    }
+        => await unitOfWork.Repository<SetEntity, DefaultIdType>()
+            .Find(x => !x.IsDeleted && command.Ids.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.IsDeleted, true)
+                .SetProperty(p => p.DeletedAt, DateTimeOffset.UtcNow)
+                .SetProperty(p => p.DeletedBy, userContext.UserId),
+                cancellationToken: cancellationToken) > 0;
 }

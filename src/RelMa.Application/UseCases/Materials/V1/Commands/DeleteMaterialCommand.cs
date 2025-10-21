@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Materials.V1.Commands;
 
-public sealed record DeleteMaterialCommand(DefaultIdType Id) : ICommand<bool>;
+public sealed record DeleteMaterialCommand(params DefaultIdType[] Ids) : ICommand<bool>;

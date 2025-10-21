@@ -15,7 +15,6 @@ using RelMa.Infrastructure.Extentions;
 using RelMa.Infrastructure.Jobs;
 using RelMa.Shared;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
 
 namespace RelMa.ApiService.Endpoints.V1;
 
@@ -45,7 +44,7 @@ internal sealed class AssetEndpoint : IEndpoint
         route.MapPut(string.Empty, Update)
             .RequireAuthorization();
 
-        route.MapDelete("{id}", Delete)
+        route.MapDelete(string.Empty, Delete)
             .RequireAuthorization();
 
         route.MapPost("upload", Upload)
@@ -145,15 +144,15 @@ internal sealed class AssetEndpoint : IEndpoint
     }
 
     public static async Task<IResult> Delete(
-        DefaultIdType id,
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
+        [FromBody] DeleteAssetCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<DeleteAssetCommand, bool>(new DeleteAssetCommand(id), cancellationToken);
+        var result = await mediator.SendCommandAsync<DeleteAssetCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:assets",
@@ -161,7 +160,6 @@ internal sealed class AssetEndpoint : IEndpoint
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
     }
-
 
     public static async Task<IResult> Upload(
         IFormFile file,

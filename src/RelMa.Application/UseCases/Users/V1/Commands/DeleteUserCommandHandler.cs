@@ -2,16 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
-using RelMa.Domain.Parts;
+using RelMa.Domain.Users;
 
-namespace RelMa.Application.UseCases.Parts.V1.Commands;
+namespace RelMa.Application.UseCases.Users.V1.Commands;
 
-public sealed class DeletePartCommandHandler(
+public sealed class DeleteUserCommandHandler(
     IUnitOfWork unitOfWork,
-    IUserContext userContext) : ICommandHandler<DeletePartCommand, bool>
+    IUserContext userContext) : ICommandHandler<DeleteUserCommand, bool>
 {
-    public async Task<bool> Handle(DeletePartCommand command, CancellationToken cancellationToken)
-        => await unitOfWork.Repository<PartEntity, DefaultIdType>()
+    public async Task<bool> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
+        => await unitOfWork.Repository<UserEntity, DefaultIdType>()
             .Find(x => !x.IsDeleted && command.Ids.Contains(x.Id))
             .ExecuteUpdateAsync(x => x
                 .SetProperty(p => p.IsDeleted, true)

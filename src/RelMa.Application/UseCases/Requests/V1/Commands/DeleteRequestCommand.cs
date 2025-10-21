@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Requests.V1.Commands;
 
-public sealed record DeleteRequestCommand(DefaultIdType Id) : ICommand<bool>;
+public sealed record DeleteRequestCommand(params DefaultIdType[] Ids) : ICommand<bool>;

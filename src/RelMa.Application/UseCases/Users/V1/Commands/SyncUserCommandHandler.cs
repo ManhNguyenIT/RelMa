@@ -21,7 +21,9 @@ public class SyncUserCommandHandler(
             {
                 Id = userContext.UserId,
                 Name = userContext.Name,
-                Username = userContext.Username
+                Username = userContext.Username,
+                Company = userContext.Company,
+                PhoneNumber = userContext.PhoneNumber,
             };
             unitOfWork.Repository<UserEntity, DefaultIdType>().Add(entity);
         }
@@ -29,11 +31,20 @@ public class SyncUserCommandHandler(
         {
             entity.Name = userContext.Name;
             entity.Username = userContext.Username;
+            entity.Company = userContext.Company;
+            entity.PhoneNumber = userContext.PhoneNumber;
             unitOfWork.Repository<UserEntity, DefaultIdType>().Update(entity);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new UserResponse() { Id = entity.Id, Name = entity.Name, Username = entity.Username };
+        return new UserResponse()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Username = entity.Username,
+            Company = entity.Company,
+            PhoneNumber = entity.PhoneNumber
+        };
     }
 }

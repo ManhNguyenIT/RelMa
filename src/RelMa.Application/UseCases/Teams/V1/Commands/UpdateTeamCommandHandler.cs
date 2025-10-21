@@ -1,7 +1,6 @@
 ﻿using Cortex.Mediator.Commands;
 using Microsoft.EntityFrameworkCore;
 using RelMa.Application.Abstractions.Database;
-using RelMa.Domain.Sets;
 using RelMa.Domain.Teams;
 using RelMa.Domain.Users;
 using RelMa.Shared.Exceptions;

@@ -7,4 +7,4 @@ public sealed record UpdateTeamCommand(
     string Name,
     string? Description,
     DefaultIdType LeaderId,
-    params DefaultIdType[] MemberIds):ICommand<DefaultIdType>;
+    params DefaultIdType[] MemberIds) : ICommand<DefaultIdType>;

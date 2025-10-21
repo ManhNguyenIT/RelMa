@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.WorkOrders.V1.Commands;
 
-public sealed record DeleteWorkOrderCommand(DefaultIdType Id) : ICommand<bool>;
+public sealed record DeleteWorkOrderCommand(params DefaultIdType[] Ids) : ICommand<bool>;

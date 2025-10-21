@@ -1,20 +1,21 @@
 ﻿using Cortex.Mediator.Commands;
+using Microsoft.EntityFrameworkCore;
+using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
 using RelMa.Domain.Tasks;
-using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
-public class DeleteTaskCommandHandler(IUnitOfWork unitOfWork) : ICommandHandler<DeleteTaskCommand, bool>
+public class DeleteTaskCommandHandler(
+    IUnitOfWork unitOfWork,
+    IUserContext userContext) : ICommandHandler<DeleteTaskCommand, bool>
 {
     public async Task<bool> Handle(DeleteTaskCommand command, CancellationToken cancellationToken)
-    {
-        var entity = await unitOfWork.Repository<TaskEntity, DefaultIdType>()
-            .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
-            ?? throw new NotFoundException($"Task with Id '{command.Id}' not found");
-
-        entity.Delete();
-        unitOfWork.Repository<TaskEntity, DefaultIdType>().Update(entity);
-        return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
-    }
+        => await unitOfWork.Repository<TaskEntity, DefaultIdType>()
+            .Find(x => !x.IsDeleted && command.Ids.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.IsDeleted, true)
+                .SetProperty(p => p.DeletedAt, DateTimeOffset.UtcNow)
+                .SetProperty(p => p.DeletedBy, userContext.UserId),
+                cancellationToken: cancellationToken) > 0;
 }

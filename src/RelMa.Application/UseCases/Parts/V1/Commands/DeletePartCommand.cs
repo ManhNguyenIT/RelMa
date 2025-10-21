@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Parts.V1.Commands;
 
-public sealed record DeletePartCommand(DefaultIdType Id) : ICommand<bool>;
+public sealed record DeletePartCommand(params DefaultIdType[] Ids) : ICommand<bool>;

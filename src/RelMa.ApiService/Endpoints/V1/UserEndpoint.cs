@@ -1,5 +1,7 @@
 ﻿using Cortex.Mediator;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Options;
 using RelMa.ApiService.Abstractions;
 using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.UseCases.Users.V1.Commands;
@@ -7,6 +9,7 @@ using RelMa.Application.UseCases.Users.V1.Queries;
 using RelMa.Application.UseCases.Users.V1.Responses;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
+using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
 
@@ -29,6 +32,10 @@ internal sealed class UserEndpoint : IEndpoint
 
         route.MapPost("sync", Sync)
             .RequireAuthorization();
+
+        route.MapDelete(string.Empty, Delete)
+            .RequireAuthorization();
+
     }
 
     public static async Task<IResult> List(
@@ -73,4 +80,24 @@ internal sealed class UserEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<SyncUserCommand, UserResponse>(new SyncUserCommand(), cancellationToken);
         return Results.Ok(result);
     }
+
+
+    public static async Task<IResult> Delete(
+        DefaultIdType id,
+        IMediator mediator,
+        IUserContext userContext,
+        IDistributedCache cache,
+        IConnectionMultiplexer multiplexer,
+        IOptions<RedisCacheOptions> options,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.SendCommandAsync<DeleteUserCommand, bool>(new DeleteUserCommand(id), cancellationToken);
+        string[] patterns =
+        [
+            $"{userContext.TenantId}:users",
+        ];
+        await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
+        return Results.Ok(result);
+    }
+
 }
