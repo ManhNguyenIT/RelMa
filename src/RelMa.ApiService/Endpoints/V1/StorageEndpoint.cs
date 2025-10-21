@@ -61,7 +61,7 @@ internal sealed class StorageEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Storages",
+            key: $"{userContext.TenantId}:storages",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetStorageQuery, PagedResult<StorageResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class StorageEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreateStorageCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Storages",
+            $"{userContext.TenantId}:storages",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class StorageEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdateStorageCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Storages",
+            $"{userContext.TenantId}:storages",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class StorageEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeleteStorageCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Storages",
+            $"{userContext.TenantId}:storages",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

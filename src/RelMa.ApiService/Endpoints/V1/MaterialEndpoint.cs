@@ -61,7 +61,7 @@ internal sealed class MaterialEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Materials",
+            key: $"{userContext.TenantId}:materials",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetMaterialQuery, PagedResult<MaterialResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class MaterialEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreateMaterialCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Materials",
+            $"{userContext.TenantId}:materials",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class MaterialEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdateMaterialCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Materials",
+            $"{userContext.TenantId}:materials",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class MaterialEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeleteMaterialCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Materials",
+            $"{userContext.TenantId}:materials",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

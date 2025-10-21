@@ -61,7 +61,7 @@ internal sealed class TeamEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Teams",
+            key: $"{userContext.TenantId}:teams",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetTeamQuery, PagedResult<TeamResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class TeamEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreateTeamCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Teams",
+            $"{userContext.TenantId}:teams",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class TeamEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdateTeamCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Teams",
+            $"{userContext.TenantId}:teams",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class TeamEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeleteTeamCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Teams",
+            $"{userContext.TenantId}:teams",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

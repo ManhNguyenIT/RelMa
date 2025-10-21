@@ -61,7 +61,7 @@ internal sealed class PartEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Parts",
+            key: $"{userContext.TenantId}:parts",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetPartQuery, PagedResult<PartResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class PartEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreatePartCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Parts",
+            $"{userContext.TenantId}:parts",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class PartEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdatePartCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Parts",
+            $"{userContext.TenantId}:parts",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class PartEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeletePartCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Parts",
+            $"{userContext.TenantId}:parts",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

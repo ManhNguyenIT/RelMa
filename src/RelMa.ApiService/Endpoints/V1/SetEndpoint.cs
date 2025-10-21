@@ -61,7 +61,7 @@ internal sealed class SetEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Sets",
+            key: $"{userContext.TenantId}:sets",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetSetQuery, PagedResult<SetResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class SetEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreateSetCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Sets",
+            $"{userContext.TenantId}:sets",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class SetEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdateSetCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Sets",
+            $"{userContext.TenantId}:sets",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class SetEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeleteSetCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Sets",
+            $"{userContext.TenantId}:sets",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);

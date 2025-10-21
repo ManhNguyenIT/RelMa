@@ -61,7 +61,7 @@ internal sealed class TaskEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var result = await cache.GetOrCreateAsync(
-            key: $"{userContext.TenantId}:Tasks",
+            key: $"{userContext.TenantId}:tasks",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetTaskQuery, PagedResult<TaskResponse>>(query, token),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
@@ -83,7 +83,7 @@ internal sealed class TaskEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<CreateTaskCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Tasks",
+            $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -101,7 +101,7 @@ internal sealed class TaskEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<UpdateTaskCommand, DefaultIdType>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Tasks",
+            $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
@@ -119,7 +119,7 @@ internal sealed class TaskEndpoint : IEndpoint
         var result = await mediator.SendCommandAsync<DeleteTaskCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
-            $"{userContext.TenantId}:Tasks",
+            $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
         return Results.Ok(result);
