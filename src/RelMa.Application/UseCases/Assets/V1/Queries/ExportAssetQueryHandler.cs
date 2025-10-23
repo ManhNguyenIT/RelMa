@@ -46,10 +46,10 @@ public sealed class ExportAssetQueryHandler(
             query = query.Select(request.Columns.Split(','));
 
         return ExcelHelper.ExportExcelStreamAsync(
-            template: Path.Combine(environment.ContentRootPath, "assets", "templates", "asset.xlsx"),
+            templatePath: Path.Combine(environment.ContentRootPath, "assets", "templates", "asset.xlsx"),
             data: query.AsAsyncEnumerable(),
-            startRow: 2,
             sheetIndex: 1,
+            startRow: 2,
             cancellationToken: cancellationToken);
     }
 }

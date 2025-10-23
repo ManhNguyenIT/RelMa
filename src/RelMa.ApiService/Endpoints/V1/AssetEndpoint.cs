@@ -212,9 +212,10 @@ internal sealed class AssetEndpoint : IEndpoint
         IMediator mediator,
         [AsParameters] ExportAssetQuery query)
     {
-        var fileName = $"asset_exported_{DateTime.Now:yyyyMMdd}.xlsx";
+        var fileName = $"assets_exported_{DateTime.Now:yyyyMMdd}.xlsx";
         var mimeType = MimeTypes.GetMimeType(fileName);
         var stream = await mediator.SendQueryAsync<ExportAssetQuery, MemoryStream>(query);
+        stream.Position = 0;
         return Results.File(stream, mimeType, Path.GetFileNameWithoutExtension(fileName), enableRangeProcessing: true);
     }
 

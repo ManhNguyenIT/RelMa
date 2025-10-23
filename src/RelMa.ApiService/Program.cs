@@ -6,14 +6,13 @@ using RelMa.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
+builder.AddOpenTelemetry();
 
 builder.Services
     .AddApplication(builder.Configuration)
     .AddPresentation(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddHealthChecks();
 builder.Services.AddCors(builder.Configuration);
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 
@@ -45,7 +44,9 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwaggerWithUi();
-    await app.ApplyMigrations();
+    app.UseDeveloperExceptionPage();
+    
+    await app.ApplyMigrations(); 
 }
 
 await app.RunAsync();
