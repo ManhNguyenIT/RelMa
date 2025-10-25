@@ -2,8 +2,7 @@
 
 public interface IJobScheduler
 {
-    public string ProcessThumbnailJob { get; }
-    Task ScheduleJob(string jobName, IDictionary<string, object>? parameters = null);
-    Task TriggerJob(string jobName, IDictionary<string, object>? parameters = null);
+    Task ScheduleJob(string jobName, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default);
+    Task TriggerJob(string jobName, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default);
 }
 

@@ -5,5 +5,5 @@ namespace RelMa.Application.UseCases.Checklists.V1.Commands;
 public sealed record CreateChecklistCommand(
     string Name,
     string? Description,
-    DefaultIdType WorkOrderId,
+    DefaultIdType? WorkOrderId,
     params DefaultIdType[] Tasks) : ICommand<DefaultIdType>;

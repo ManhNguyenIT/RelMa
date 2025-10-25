@@ -45,8 +45,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwaggerWithUi();
     app.UseDeveloperExceptionPage();
-    
-    await app.ApplyMigrations(); 
+
+    await app.ApplyMigrations();
 }
 
 await app.RunAsync();

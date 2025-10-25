@@ -47,14 +47,13 @@ internal sealed class WorkOrderEndpoint : IEndpoint
             .RequireAuthorization();
     }
 
-    public static async Task<IResult> List(
+    public static async Task<PagedResult<WorkOrderResponse>?> List(
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         [AsParameters] GetWorkOrderQuery query,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:work-orders",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetWorkOrderQuery, PagedResult<WorkOrderResponse>>(query, token),
@@ -62,10 +61,7 @@ internal sealed class WorkOrderEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Create(
+    public static async Task<DefaultIdType> Create(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -80,10 +76,10 @@ internal sealed class WorkOrderEndpoint : IEndpoint
             $"{userContext.TenantId}:work-orders",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Update(
+    public static async Task<DefaultIdType> Update(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -98,16 +94,16 @@ internal sealed class WorkOrderEndpoint : IEndpoint
             $"{userContext.TenantId}:work-orders",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Delete(
+    public static async Task<bool> Delete(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] DeleteWorkOrderCommand command,
+        [AsParameters] DeleteWorkOrderCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.SendCommandAsync<DeleteWorkOrderCommand, bool>(command, cancellationToken);
@@ -116,7 +112,7 @@ internal sealed class WorkOrderEndpoint : IEndpoint
             $"{userContext.TenantId}:work-orders",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
     public static async Task<IResult> Import()

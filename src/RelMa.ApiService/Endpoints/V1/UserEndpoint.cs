@@ -38,14 +38,13 @@ internal sealed class UserEndpoint : IEndpoint
 
     }
 
-    public static async Task<IResult> List(
+    public static async Task<PagedResult<UserResponse>?> List(
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         [AsParameters] GetUserQuery query,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:users",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetUserQuery, PagedResult<UserResponse>>(query, token),
@@ -53,16 +52,12 @@ internal sealed class UserEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Info(
+    public static async Task<UserResponse?> Info(
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:user-info:{userContext.UserId}",
             param: null,
             factory: async token => await mediator.SendQueryAsync<GetUserInfoQuery, UserResponse>(new GetUserInfoQuery(), token),
@@ -70,34 +65,28 @@ internal sealed class UserEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Sync(
+    public static async Task<UserResponse?> Sync(
         IMediator mediator,
         CancellationToken cancellationToken)
-    {
-        var result = await mediator.SendCommandAsync<SyncUserCommand, UserResponse>(new SyncUserCommand(), cancellationToken);
-        return Results.Ok(result);
-    }
+        => await mediator.SendCommandAsync<SyncUserCommand, UserResponse>(new SyncUserCommand(), cancellationToken);
 
 
-    public static async Task<IResult> Delete(
-        DefaultIdType id,
+    public static async Task<bool> Delete(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
+        [AsParameters] DeleteUserCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.SendCommandAsync<DeleteUserCommand, bool>(new DeleteUserCommand(id), cancellationToken);
+        var result = await mediator.SendCommandAsync<DeleteUserCommand, bool>(command, cancellationToken);
         string[] patterns =
         [
             $"{userContext.TenantId}:users",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
 }

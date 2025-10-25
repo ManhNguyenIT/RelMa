@@ -20,13 +20,13 @@ public sealed class CreateAssetCommandHandler(
         {
             Id = DefaultIdType.CreateVersion7(),
             Name = command.Name,
+            Code = command.Code,
             LocationId = command.LocationId,
             Area = command.Area,
-            SerialNumber = command.Barcode,
+            SerialNumber = command.SerialNumber,
             Category = command.Category,
             Description = command.Description,
             Model = command.Model,
-            Code = command.SerialNumber,
             Images = command.Images,
             Status = Status.Open,
         };

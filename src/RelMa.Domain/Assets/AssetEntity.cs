@@ -26,7 +26,7 @@ public class AssetEntity : Entity<DefaultIdType>
     public required string Name { get; set; }
     public required string Code { get; set; }
     public required Status Status { get; set; }
-    public required DefaultIdType LocationId { get; set; }
+    public DefaultIdType? LocationId { get; set; }
     public string? Area { get; set; }
     public string? SerialNumber { get; set; }
     public string? Category { get; set; }

@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -182,7 +183,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     status = table.Column<int>(type: "integer", nullable: false),
-                    location_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    location_id = table.Column<Guid>(type: "uuid", nullable: true),
                     area = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
                     serial_number = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     category = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
@@ -460,7 +461,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
-                    work_order_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    work_order_id = table.Column<Guid>(type: "uuid", nullable: true),
                     tenant_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     modified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -601,7 +602,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    asset_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    asset_id = table.Column<Guid>(type: "uuid", nullable: true),
                     checklist_id = table.Column<Guid>(type: "uuid", nullable: true),
                     type = table.Column<int>(type: "integer", nullable: false),
                     value = table.Column<JsonDocument>(type: "jsonb", nullable: false),

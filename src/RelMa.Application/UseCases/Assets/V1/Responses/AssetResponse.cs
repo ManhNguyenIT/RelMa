@@ -7,9 +7,9 @@ namespace RelMa.Application.UseCases.Assets.V1.Responses;
 public class AssetResponse
 {
     [ColumnLetter("A")]
-    public required DefaultIdType Id { get; set; }
+    public DefaultIdType? Id { get; set; }
     [ColumnLetter("B")]
-    public required string Name { get; set; }
+    public string? Name { get; set; }
     [ColumnLetter("C")]
     public string? Area { get; set; }
     [JsonIgnore]
@@ -25,6 +25,6 @@ public class AssetResponse
     public string? Model { get; set; }
     [ColumnLetter("I")]
     public string? SerialNumber { get; set; }
-    public required DefaultIdType LocationId { get; set; }
+    public DefaultIdType? LocationId { get; set; }
     public virtual LocationResponse? Location { get; set; }
 }

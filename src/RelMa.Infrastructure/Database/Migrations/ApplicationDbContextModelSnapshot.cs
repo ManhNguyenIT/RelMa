@@ -163,7 +163,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<Guid>("LocationId")
+                    b.Property<Guid?>("LocationId")
                         .HasColumnType("uuid")
                         .HasColumnName("location_id");
 
@@ -262,7 +262,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("tenant_id");
 
-                    b.Property<Guid>("WorkOrderId")
+                    b.Property<Guid?>("WorkOrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("work_order_id");
 
@@ -942,7 +942,7 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AssetId")
+                    b.Property<Guid?>("AssetId")
                         .HasColumnType("uuid")
                         .HasColumnName("asset_id");
 
@@ -1323,7 +1323,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .WithMany("Assets")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_assets_locations_location_id");
 
                     b.Navigation("Location");
@@ -1335,7 +1334,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .WithMany("Checklists")
                         .HasForeignKey("WorkOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_checklists_work_orders_work_order_id");
 
                     b.Navigation("WorkOrder");
@@ -1446,7 +1444,6 @@ namespace RelMa.Infrastructure.Database.Migrations
                         .WithMany("Tasks")
                         .HasForeignKey("AssetId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_tasks_assets_asset_id");
 
                     b.HasOne("RelMa.Domain.Checklists.ChecklistEntity", "Checklist")

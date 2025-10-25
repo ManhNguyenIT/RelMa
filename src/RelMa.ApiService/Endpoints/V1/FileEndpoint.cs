@@ -22,6 +22,9 @@ internal sealed class FileEndpoint : IEndpoint
             .RequireAuthorization()
             .DisableAntiforgery();
 
+        route.MapGet("prepare-download", Download)
+            .RequireAuthorization();
+
         route.MapGet("download", Download)
             .RequireAuthorization();
     }

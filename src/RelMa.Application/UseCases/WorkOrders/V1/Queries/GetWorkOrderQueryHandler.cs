@@ -93,10 +93,11 @@ public sealed class GetWorkOrderQueryHandler(
             query = query.Includes(request.Includes.Split(','));
 
         if (request.Filters?.Length > 0)
-            query = query.Where(request.Filters);
+            query = query.ApplyFilters(request.Filters);
 
-        if (request.Orders?.Length > 0)
-            query = query.OrderBy(request.Orders);
+        query = request.Orders?.Length > 0
+            ? query.ApplySorts(request.Orders)
+            : query.OrderBy(x => x.No);
 
         if (request.Columns?.Length > 0)
             query = query.Select(request.Columns.Split(','));

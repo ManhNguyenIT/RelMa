@@ -2,6 +2,7 @@
 
 public enum ProcessingStatus
 {
+    None,
     Queued,
     Processing,
     Completed,

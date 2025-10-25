@@ -43,10 +43,10 @@ public sealed class GetMaintenanceQueryHandler(
             query = query.Includes(request.Includes.Split(','));
 
         if (request.Filters?.Length > 0)
-            query = query.Where(request.Filters);
+            query = query.ApplyFilters(request.Filters);
 
         query = request.Orders?.Length > 0
-            ? query.OrderBy(request.Orders)
+            ? query.ApplySorts(request.Orders)
             : query.OrderByDescending(o => o.Id);
 
         if (request.Columns?.Length > 0)

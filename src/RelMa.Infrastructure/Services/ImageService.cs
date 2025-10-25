@@ -13,8 +13,8 @@ using System.Globalization;
 
 namespace RelMa.Infrastructure.Services;
 internal sealed class ImageService(
-    IWebHostEnvironment environment,
-    ILogger<ImageService> logger) : IImageService
+    ILogger<ImageService> logger,
+    IWebHostEnvironment environment) : IImageService
 {
     private static readonly int[] DefaultThumbnailWidths = [32, 64, 128, 256, 512, 1024];
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
@@ -92,7 +92,6 @@ internal sealed class ImageService(
         int[]? widths = null,
         CancellationToken cancellationToken = default)
     {
-        widths ??= DefaultThumbnailWidths;
         var folderPath = Path.Combine(environment.ContentRootPath, ThumbnailsPath);
         if (!Directory.Exists(folderPath))
         {
@@ -111,7 +110,7 @@ internal sealed class ImageService(
             using var image = await Image.LoadAsync(originalPath, cancellationToken);
             var format = GetImageFormat(file);
 
-            foreach (var width in widths)
+            foreach (var width in widths ?? DefaultThumbnailWidths)
             {
                 if (width <= 0) continue;
 

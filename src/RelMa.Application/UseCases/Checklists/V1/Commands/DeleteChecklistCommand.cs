@@ -2,4 +2,4 @@
 
 namespace RelMa.Application.UseCases.Checklists.V1.Commands;
 
-public sealed record DeleteChecklistCommand(DefaultIdType Id) : ICommand<bool>;
+public sealed record DeleteChecklistCommand(params DefaultIdType[] Ids) : ICommand<bool>;

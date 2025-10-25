@@ -12,6 +12,7 @@ using RelMa.Application.UseCases.Tasks.V1.Queries;
 using RelMa.Application.UseCases.Tasks.V1.Responses;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
+using RelMa.Shared.Contracts;
 using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
@@ -53,14 +54,13 @@ internal sealed class TaskEndpoint : IEndpoint
             .RequireAuthorization();
     }
 
-    public static async Task<IResult> List(
+    public static async Task<PagedResult<TaskResponse>?> List(
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         [AsParameters] GetTaskQuery query,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:tasks",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetTaskQuery, PagedResult<TaskResponse>>(query, token),
@@ -68,10 +68,7 @@ internal sealed class TaskEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Create(
+    public static async Task<DefaultIdType> Create(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -86,10 +83,10 @@ internal sealed class TaskEndpoint : IEndpoint
             $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Update(
+    public static async Task<DefaultIdType> Update(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -104,16 +101,16 @@ internal sealed class TaskEndpoint : IEndpoint
             $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Delete(
+    public static async Task<bool> Delete(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] DeleteTaskCommand command,
+        [AsParameters] DeleteTaskCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.SendCommandAsync<DeleteTaskCommand, bool>(command, cancellationToken);
@@ -122,7 +119,7 @@ internal sealed class TaskEndpoint : IEndpoint
             $"{userContext.TenantId}:tasks",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
 
@@ -134,7 +131,7 @@ internal sealed class TaskEndpoint : IEndpoint
     {
         var fileName = await imageService.SaveImagesAsync(file, cancellationToken);
 
-        await scheduler.TriggerJob(scheduler.ProcessThumbnailJob, new Dictionary<string, object>
+        await scheduler.TriggerJob(JobContract.GenerateThumbnails, new Dictionary<string, object>
         {
             { "fileName", fileName }
         });

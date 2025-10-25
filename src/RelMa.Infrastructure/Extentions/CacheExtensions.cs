@@ -24,6 +24,35 @@ public static class DistributedCacheExtensions
             : JsonSerializer.Deserialize<T>(json);
     }
 
+    public static async Task SetAsync<T>(
+        this IDistributedCache cache,
+        string key,
+        Func<CancellationToken, Task<T>> factory,
+        TimeSpan absoluteExpirationRelativeToNow,
+        object? param = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (param is not null)
+        {
+            key = $"{key}:{JsonSerializer.Serialize(param)}";
+        }
+
+        var result = await factory(cancellationToken);
+
+        if (result is not null)
+        {
+            await cache.SetStringAsync(
+                key,
+                JsonSerializer.Serialize(result),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow
+                },
+                cancellationToken
+            );
+        }
+    }
+
     public static async Task<T?> GetOrCreateAsync<T>(
         this IDistributedCache cache,
         string key,

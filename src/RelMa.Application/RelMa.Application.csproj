@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<ItemGroup>
-		<PackageReference Include="ClosedXML" />
-		<PackageReference Include="Cortex.Mediator" />
-		<PackageReference Include="Dapper" />
-		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\RelMa.Domain\RelMa.Domain.csproj" />
-		<ProjectReference Include="..\RelMa.Shared\RelMa.Shared.csproj" />
-	</ItemGroup>
-
+  <ItemGroup>
+  	<PackageReference Include="ClosedXML" />
+  	<PackageReference Include="Cortex.Mediator" />
+  	<PackageReference Include="Dapper" />
+  	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  	<PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" />
+  	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  	<PackageReference Include="Quartz.Extensions.Hosting" />
+  	<PackageReference Include="Quartz.Serialization.Json" />
+  </ItemGroup>
+  
+  <ItemGroup>
+  	<ProjectReference Include="..\RelMa.Domain\RelMa.Domain.csproj" />
+  	<ProjectReference Include="..\RelMa.Shared\RelMa.Shared.csproj" />
+  </ItemGroup>
 </Project>

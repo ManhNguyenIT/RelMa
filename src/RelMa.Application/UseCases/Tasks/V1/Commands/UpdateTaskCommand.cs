@@ -6,6 +6,6 @@ namespace RelMa.Application.UseCases.Tasks.V1.Commands;
 
 public sealed record UpdateTaskCommand(
     DefaultIdType Id,
-    DefaultIdType AssetId,
+    DefaultIdType? AssetId,
     TaskType Type,
     JsonDocument Value) : ICommand<DefaultIdType>;

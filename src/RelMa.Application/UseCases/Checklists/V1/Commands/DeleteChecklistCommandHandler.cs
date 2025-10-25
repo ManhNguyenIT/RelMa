@@ -1,21 +1,21 @@
 ﻿using Cortex.Mediator.Commands;
+using Microsoft.EntityFrameworkCore;
+using RelMa.Application.Abstractions.Authentication;
 using RelMa.Application.Abstractions.Database;
 using RelMa.Domain.Checklists;
-using RelMa.Shared.Exceptions;
 
 namespace RelMa.Application.UseCases.Checklists.V1.Commands;
 
 public sealed class DeleteChecklistCommandHandler(
-    IUnitOfWork unitOfWork) : ICommandHandler<DeleteChecklistCommand, bool>
+    IUnitOfWork unitOfWork,
+    IUserContext userContext) : ICommandHandler<DeleteChecklistCommand, bool>
 {
     public async Task<bool> Handle(DeleteChecklistCommand command, CancellationToken cancellationToken)
-    {
-        var entity = await unitOfWork.Repository<ChecklistEntity, DefaultIdType>()
-            .FindByIdAsync(command.Id, cancellationToken: cancellationToken)
-            ?? throw new NotFoundException($"Checklist with Id '{command.Id}' not found");
-
-        entity.Delete();
-        unitOfWork.Repository<ChecklistEntity, DefaultIdType>().Update(entity);
-        return await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
-    }
+        => await unitOfWork.Repository<ChecklistEntity, DefaultIdType>()
+            .Find(x => !x.IsDeleted && command.Ids.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.IsDeleted, true)
+                .SetProperty(p => p.DeletedAt, DateTimeOffset.UtcNow)
+                .SetProperty(p => p.DeletedBy, userContext.UserId),
+                cancellationToken: cancellationToken) > 0;
 }

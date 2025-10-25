@@ -7,7 +7,7 @@ namespace RelMa.Domain.Tasks;
 
 public class TaskEntity : Entity<DefaultIdType>
 {
-    public required DefaultIdType AssetId { get; set; }
+    public DefaultIdType? AssetId { get; set; }
     public DefaultIdType? ChecklistId { get; set; }
     public required TaskType Type { get; set; }
     public required JsonDocument Value { get; set; }

@@ -13,7 +13,7 @@ public class ChecklistEntity : Entity<DefaultIdType>
 
     public required string Name { get; set; }
     public string? Description { get; set; }
-    public required DefaultIdType WorkOrderId { get; set; }
+    public DefaultIdType? WorkOrderId { get; set; }
     public virtual WorkOrderEntity? WorkOrder { get; set; }
     public virtual ICollection<TaskEntity>? Tasks { get; private set; }
 

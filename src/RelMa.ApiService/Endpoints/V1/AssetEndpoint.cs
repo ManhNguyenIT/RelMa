@@ -14,6 +14,7 @@ using RelMa.Application.UseCases.Assets.V1.Responses;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Infrastructure.Jobs;
 using RelMa.Shared;
+using RelMa.Shared.Contracts;
 using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
@@ -33,9 +34,10 @@ internal sealed class AssetEndpoint : IEndpoint
             .RequireAuthorization();
 
         route.MapGet("{id}", Info)
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status404NotFound);
 
-        route.MapGet("{id}/processing-status", Status)
+        route.MapGet("{id}/status", Status)
             .RequireAuthorization();
 
         route.MapPost(string.Empty, Create)
@@ -61,14 +63,13 @@ internal sealed class AssetEndpoint : IEndpoint
             .RequireAuthorization();
     }
 
-    public static async Task<IResult> List(
+    public static async Task<PagedResult<AssetResponse>?> List(
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         [AsParameters] GetAssetQuery query,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:assets",
             param: query,
             factory: async token => await mediator.SendQueryAsync<GetAssetQuery, PagedResult<AssetResponse>>(query, token),
@@ -76,17 +77,13 @@ internal sealed class AssetEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Info(
+    public static async Task<AssetResponse?> Info(
         DefaultIdType id,
         IMediator mediator,
         IDistributedCache cache,
         IUserContext userContext,
         CancellationToken cancellationToken)
-    {
-        var result = await cache.GetOrCreateAsync(
+        => await cache.GetOrCreateAsync(
             key: $"{userContext.TenantId}:asset-info:{id}",
             param: id,
             factory: async token => await mediator.SendQueryAsync<GetAssetInfoQuery, AssetResponse>(new GetAssetInfoQuery(id), token),
@@ -94,19 +91,13 @@ internal sealed class AssetEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-        return Results.Ok(result);
-    }
-
-    public static async Task<IResult> Status(
+    public static async Task<ProcessingStatus> Status(
         DefaultIdType id,
         IDistributedCache cache,
         CancellationToken cancellationToken)
-    {
-        var status = await cache.GetAsync<ProcessingStatus>($"asset-processing-status", id, cancellationToken);
-        return Results.Ok(status);
-    }
+        => await cache.GetAsync<ProcessingStatus?>($"status", id, cancellationToken) ?? ProcessingStatus.None;
 
-    public static async Task<IResult> Create(
+    public static async Task<DefaultIdType> Create(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -121,10 +112,10 @@ internal sealed class AssetEndpoint : IEndpoint
             $"{userContext.TenantId}:assets",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Update(
+    public static async Task<DefaultIdType> Update(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
@@ -140,16 +131,16 @@ internal sealed class AssetEndpoint : IEndpoint
             $"{userContext.TenantId}:asset-info:{command.Id}",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
-    public static async Task<IResult> Delete(
+    public static async Task<bool> Delete(
         IMediator mediator,
         IUserContext userContext,
         IDistributedCache cache,
         IConnectionMultiplexer multiplexer,
         IOptions<RedisCacheOptions> options,
-        [FromBody] DeleteAssetCommand command,
+        [AsParameters] DeleteAssetCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.SendCommandAsync<DeleteAssetCommand, bool>(command, cancellationToken);
@@ -158,7 +149,7 @@ internal sealed class AssetEndpoint : IEndpoint
             $"{userContext.TenantId}:assets",
         ];
         await cache.RemoveCachesAsync(multiplexer, options, patterns, cancellationToken);
-        return Results.Ok(result);
+        return result;
     }
 
     public static async Task<IResult> Upload(
@@ -189,12 +180,12 @@ internal sealed class AssetEndpoint : IEndpoint
             { "fileName", fileName }
         };
 
-        await scheduler.TriggerJob(scheduler.ProcessThumbnailJob, result);
+        await scheduler.TriggerJob(JobContract.GenerateThumbnails, result, cancellationToken);
 
         return Results.Accepted(
             linkGenerator.GetPathByAction(
                httpContext: accessor.HttpContext,
-               action: "processing-status",
+               action: "status",
                controller: "assets",
                values: new { id }
             ),

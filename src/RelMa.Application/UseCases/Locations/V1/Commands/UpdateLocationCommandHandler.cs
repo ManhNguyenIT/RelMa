@@ -19,6 +19,7 @@ public class UpdateLocationCommandHandler(IUnitOfWork unitOfWork) : ICommandHand
             throw new ConflictException($"Đã tồn tại Location với tên {command.Name}");
 
         entity.Name = command.Name;
+        entity.Description = command.Description;
         unitOfWork.Repository<LocationEntity, DefaultIdType>().Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

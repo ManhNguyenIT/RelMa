@@ -18,6 +18,7 @@ public sealed class CreateLocationCommandHandler(IUnitOfWork unitOfWork) : IComm
         {
             Id = DefaultIdType.CreateVersion7(),
             Name = command.Name,
+            Description = command.Description
         };
         unitOfWork.Repository<LocationEntity, DefaultIdType>().Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);

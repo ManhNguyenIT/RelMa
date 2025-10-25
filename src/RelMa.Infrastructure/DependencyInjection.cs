@@ -30,6 +30,7 @@ using RelMa.Infrastructure.Services;
 using RelMa.Shared;
 using RelMa.Shared.Events;
 using StackExchange.Redis;
+using System.Reflection;
 
 namespace RelMa.Infrastructure;
 
@@ -76,12 +77,15 @@ public static class DependencyInjection
                 persistentOptions.UseNewtonsoftJsonSerializer();
             });
 
-            options.AddJob<ProcessThumbnailJob>(opts => opts.WithIdentity(nameof(ProcessThumbnailJob)).StoreDurably());
+            var jobs = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => typeof(IJob).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
 
-            var jobKey = new JobKey(nameof(ProcessSchedulerJob));
-            options
-                .AddJob<ProcessSchedulerJob>(jobKey)
-                .AddTrigger(trigger => trigger.ForJob(jobKey).WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(10).RepeatForever()));
+            foreach (var job in jobs)
+            {
+                options.AddJob(job, new JobKey(job.Name), opts => opts
+                    .WithIdentity(job.Name)
+                    .StoreDurably());
+            }
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
