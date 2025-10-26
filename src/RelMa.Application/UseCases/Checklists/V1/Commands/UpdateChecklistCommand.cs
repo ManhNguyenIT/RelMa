@@ -6,5 +6,5 @@ public sealed record UpdateChecklistCommand(
     DefaultIdType Id,
     string Name,
     string? Description,
-    DefaultIdType WorkOrderId,
+    DefaultIdType? WorkOrderId,
     params DefaultIdType[] Tasks) : ICommand<DefaultIdType>;

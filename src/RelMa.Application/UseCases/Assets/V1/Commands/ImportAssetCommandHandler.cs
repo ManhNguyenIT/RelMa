@@ -8,9 +8,9 @@ namespace RelMa.Application.UseCases.Assets.V1.Commands;
 
 public sealed class ImportAssetCommandHandler(
     IWebHostEnvironment environment,
-    ILogger<ImportAssetCommandHandler> logger) : ICommandHandler<ImportAssetCommand, DefaultIdType>
+    ILogger<ImportAssetCommandHandler> logger) : ICommandHandler<ImportAssetCommand, (DefaultIdType, string)>
 {
-    public async Task<DefaultIdType> Handle(ImportAssetCommand command, CancellationToken cancellationToken)
+    public async Task<(DefaultIdType, string)> Handle(ImportAssetCommand command, CancellationToken cancellationToken)
     {
         var folderPath = Path.Combine(environment.ContentRootPath, "assets/uploads/assets");
         if (!Directory.Exists(folderPath))
@@ -34,10 +34,7 @@ public sealed class ImportAssetCommandHandler(
             using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
             await command.File.CopyToAsync(stream, cancellationToken);
             logger.LogInformation("Saved file: {FilePath}", filePath);
-
-
-
-            return id;
+            return (id, fileName);
         }
         catch (IOException ex)
         {

@@ -20,7 +20,8 @@ using RelMa.Domain.WorkOrders;
 
 namespace RelMa.Infrastructure.Database;
 public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options, IUserContext? userContext = null)
+    DbContextOptions<ApplicationDbContext> options,
+    IUserContext? userContext = null)
     : DbContext(options)
 {
     public DbSet<AssetEntity> Assets { get; set; }

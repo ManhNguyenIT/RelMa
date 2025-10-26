@@ -1,12 +1,17 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Quartz;
 using RelMa.Application.Abstractions.Database;
+using RelMa.Application.Extentions;
 using RelMa.Application.Helpers;
 using RelMa.Application.UseCases.Assets.V1.Responses;
 using RelMa.Domain.Assets;
+using RelMa.Domain.Locations;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Shared.Exceptions;
+using System.Data;
+using System.Linq.Dynamic.Core;
 
 namespace RelMa.Infrastructure.Jobs;
 
@@ -21,81 +26,95 @@ public sealed class ImportAssetsJob(
             return;
 
         var fileName = context.MergedJobDataMap.GetString("fileName");
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrWhiteSpace(fileName))
             return;
+
+        var tenantId = context.MergedJobDataMap.GetString("tenantId");
+
         var processed = 0;
+        const int batchSize = 500;
         var status = new Dictionary<string, object>
         {
-            ["Status"] = ProcessingStatus.Processing,
-            ["Processed"] = processed,
-            ["Message"] = string.Empty
+            ["status"] = ProcessingStatus.Processing,
+            ["processed"] = processed,
+            ["message"] = string.Empty
         };
 
-        await cache.SetAsync(
-            key: $"status",
-            param: id,
-            factory: _ => Task.FromResult(status),
-            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-            cancellationToken: default
-        );
+        async Task UpdateStatusAsync()
+        {
+            await cache.SetAsync(
+                key: "status",
+                param: id,
+                factory: _ => Task.FromResult(status),
+                absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
+                cancellationToken: context.CancellationToken
+            );
+        }
 
-#pragma warning disable CA1031 // Do not catch general exception types
+        await UpdateStatusAsync();
+
         try
         {
-            await unitOfWork.BeginTransactionAsync(default);
-            using var fileStream = File.OpenRead(Path.Combine(environment.ContentRootPath, "assets/uploads/assets", fileName));
-            var task = ExcelHelper.ImportExcelAsync<AssetResponse>(
+            await unitOfWork.BeginTransactionAsync(context.CancellationToken);
+
+            var filePath = Path.Combine(environment.ContentRootPath, "assets/uploads/assets", fileName);
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Không tìm thấy file: {filePath}");
+
+            await using var fileStream = File.OpenRead(filePath);
+
+            await foreach (var item in ExcelHelper.ImportExcelAsync<AssetResponse>(
                 fileStream: fileStream,
                 startRow: 2,
                 sheetName: null,
-                cancellationToken: default
-            );
-
-            await foreach (var item in task)
+                cancellationToken: context.CancellationToken))
             {
-                var entity = new AssetEntity()
+                var locationId = string.IsNullOrEmpty(item.LocationName)
+                    ? (DefaultIdType?)null
+                    : await unitOfWork.Repository<LocationEntity, DefaultIdType>()
+                        .Find(x => !x.IsDeleted && x.Name == item.LocationName)
+                        .Select(x => x.Id)
+                        .FirstOrDefaultAsync();
+
+                unitOfWork.Repository<AssetEntity, DefaultIdType>().Add(new AssetEntity
                 {
                     Id = DefaultIdType.CreateVersion7(),
                     Name = item.Name ?? throw new BadRequestException("Name cannot be null"),
                     Code = item.Code ?? throw new BadRequestException("Code cannot be null"),
                     Area = item.Area,
-                    LocationId = item.LocationId,
+                    LocationId = locationId,
                     SerialNumber = item.SerialNumber,
                     Category = item.Category,
                     Description = item.Description,
                     Model = item.Model,
                     Status = Status.Open,
-                };
+                    TenantId = tenantId
+                });
 
-                unitOfWork.Repository<AssetEntity, DefaultIdType>().Add(entity);
-                if (++processed % 100 == 0)
-                    await unitOfWork.SaveChangesAsync(default);
+                if (++processed % batchSize == 0)
+                {
+                    await unitOfWork.SaveChangesAsync(context.CancellationToken);
 
-                status["Processed"] = processed;
-                await cache.SetAsync(
-                    key: $"status",
-                    param: id,
-                    factory: _ => Task.FromResult(status),
-                    absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-                    cancellationToken: default
-                );
+                    status["processed"] = processed;
+                    await UpdateStatusAsync();
+                }
             }
 
-            await unitOfWork.CommitAsync(default);
+            if (processed % batchSize != 0)
+                await unitOfWork.SaveChangesAsync(context.CancellationToken);
+
+            await unitOfWork.CommitAsync(context.CancellationToken);
+
+            status["status"] = ProcessingStatus.Completed;
+            status["processed"] = processed;
+            await UpdateStatusAsync();
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync(default);
-            status["Status"] = ProcessingStatus.Failed;
-            status["Message"] = ex.Message;
-            await cache.GetOrCreateAsync(
-                key: $"status",
-                param: id,
-                factory: _ => Task.FromResult(status),
-                absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-                cancellationToken: default
-            );
+            await unitOfWork.RollbackAsync(context.CancellationToken);
+            status["status"] = ProcessingStatus.Failed;
+            status["message"] = ex.Message;
+            await UpdateStatusAsync();
         }
-#pragma warning restore CA1031 // Do not catch general exception types
     }
 }

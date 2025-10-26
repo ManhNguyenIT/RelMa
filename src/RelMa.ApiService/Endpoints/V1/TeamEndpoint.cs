@@ -11,8 +11,8 @@ using RelMa.Application.UseCases.Teams.V1.Commands;
 using RelMa.Application.UseCases.Teams.V1.Queries;
 using RelMa.Application.UseCases.Teams.V1.Responses;
 using RelMa.Infrastructure.Extentions;
+using RelMa.Infrastructure.Jobs;
 using RelMa.Shared;
-using RelMa.Shared.Contracts;
 using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
@@ -131,7 +131,7 @@ internal sealed class TeamEndpoint : IEndpoint
     {
         var fileName = await imageService.SaveImagesAsync(file, cancellationToken);
 
-        await scheduler.TriggerJob(JobContract.GenerateThumbnails, new Dictionary<string, object>
+        await scheduler.TriggerJob(nameof(GenerateThumbnailsJob), new Dictionary<string, object>
         {
             { "fileName", fileName }
         });

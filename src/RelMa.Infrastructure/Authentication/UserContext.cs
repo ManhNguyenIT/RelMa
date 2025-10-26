@@ -15,8 +15,7 @@ internal sealed class UserContext(
     public string? Name => contextAccessor.HttpContext?.User.GetName();
     public string? Company => contextAccessor.HttpContext?.User.GetCompany();
     public string? PhoneNumber => contextAccessor.HttpContext?.User.GetPhoneNumber();
-    public DefaultIdType UserId => contextAccessor.HttpContext?.User.GetUserId()
-        ?? throw new UnauthorizedException("UserId not found.");
+    public DefaultIdType UserId => contextAccessor.HttpContext?.User.GetUserId() ?? DefaultIdType.Empty;
     public string? TenantId
     {
         get

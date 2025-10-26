@@ -179,12 +179,6 @@ public static class DependencyInjection
                 options.SwaggerDoc(version, new OpenApiInfo() { Version = version });
             }
 
-            options.MapType<DefaultIdType>(() => new OpenApiSchema
-            {
-                Type = "string",
-                Format = "ulid"
-            });
-
             options.CustomSchemaIds(type => type.ToString().Replace('+', '.'));
 
             options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme

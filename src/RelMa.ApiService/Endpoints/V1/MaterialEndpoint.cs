@@ -12,7 +12,6 @@ using RelMa.Application.UseCases.Materials.V1.Queries;
 using RelMa.Application.UseCases.Materials.V1.Responses;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Shared;
-using RelMa.Shared.Contracts;
 using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
@@ -130,11 +129,6 @@ internal sealed class MaterialEndpoint : IEndpoint
         CancellationToken cancellationToken)
     {
         var fileName = await imageService.SaveImagesAsync(file, cancellationToken);
-
-        await scheduler.TriggerJob(JobContract.GenerateThumbnails, new Dictionary<string, object>
-        {
-            { "fileName", fileName }
-        }, cancellationToken);
 
         return Results.Ok(fileName);
     }

@@ -19,32 +19,42 @@ public sealed class GenerateThumbnailsJob(
         if (string.IsNullOrEmpty(fileName))
             return;
 
+        var status = new Dictionary<string, object>
+        {
+            ["status"] = ProcessingStatus.Queued,
+            ["message"] = string.Empty
+        };
+
         await cache.GetOrCreateAsync(
             key: $"status",
             param: id,
-            factory: async token => await Task.FromResult(ProcessingStatus.Processing),
+            factory: _ => Task.FromResult(status),
             absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-            cancellationToken: default
+            cancellationToken: context.CancellationToken
         );
         try
         {
             await imageService.GenerateThumbnailsAsync(fileName);
+
+            status["status"] = ProcessingStatus.Completed;
             await cache.GetOrCreateAsync(
                 key: $"status",
                 param: id,
-                factory: async token => await Task.FromResult(ProcessingStatus.Completed),
+                factory: _ => Task.FromResult(status),
                 absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-                cancellationToken: default
+                cancellationToken: context.CancellationToken
             );
         }
-        catch
+        catch(Exception ex)
         {
+            status["status"] = ProcessingStatus.Failed;
+            status["message"] = ex.Message;
             await cache.GetOrCreateAsync(
                 key: $"status",
                 param: id,
-                factory: async token => await Task.FromResult(ProcessingStatus.Failed),
+                factory: _ => Task.FromResult(status),
                 absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
-                cancellationToken: default
+                cancellationToken: context.CancellationToken
             );
             throw;
         }

@@ -157,7 +157,9 @@ public static class ExcelHelper
         foreach (var (prop, _) in columnProps)
         {
             var propValue = prop.GetValue(item);
-            var defaultValue = Activator.CreateInstance(prop.PropertyType);
+            object? defaultValue = prop.PropertyType.IsValueType
+                ? Activator.CreateInstance(prop.PropertyType)
+                : null;
             if (!Equals(propValue, defaultValue))
             {
                 return true;

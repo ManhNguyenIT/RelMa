@@ -14,7 +14,6 @@ using RelMa.Application.UseCases.Assets.V1.Responses;
 using RelMa.Infrastructure.Extentions;
 using RelMa.Infrastructure.Jobs;
 using RelMa.Shared;
-using RelMa.Shared.Contracts;
 using StackExchange.Redis;
 
 namespace RelMa.ApiService.Endpoints.V1;
@@ -54,7 +53,8 @@ internal sealed class AssetEndpoint : IEndpoint
             .DisableAntiforgery();
 
         route.MapPost("import", Import)
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .DisableAntiforgery();
 
         route.MapGet("export", Export)
             .RequireAuthorization();
@@ -91,11 +91,20 @@ internal sealed class AssetEndpoint : IEndpoint
             cancellationToken: cancellationToken
         );
 
-    public static async Task<ProcessingStatus> Status(
+    public static async Task<IResult> Status(
         DefaultIdType id,
         IDistributedCache cache,
         CancellationToken cancellationToken)
-        => await cache.GetAsync<ProcessingStatus?>($"status", id, cancellationToken) ?? ProcessingStatus.None;
+    {
+        var result = await cache.GetOrCreateAsync(
+            key: $"status",
+            param: id,
+            factory: _ => Task.FromResult(new Dictionary<string, object>() { { "status", ProcessingStatus.None } }),
+            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
+            cancellationToken: cancellationToken
+        );
+        return Results.Ok(result);
+    }
 
     public static async Task<DefaultIdType> Create(
         IMediator mediator,
@@ -166,12 +175,18 @@ internal sealed class AssetEndpoint : IEndpoint
 
         var (id, fileName) = await imageService.SaveImagesAsync(file, cancellationToken);
 
-        await cache.GetOrCreateAsync(
-            key: $"asset-processing-status",
+        var status = new Dictionary<string, object>
+        {
+            ["status"] = ProcessingStatus.Queued,
+            ["message"] = string.Empty
+        };
+
+        await cache.SetAsync(
+            key: "status",
             param: id,
-            factory: token => Task.FromResult(ProcessingStatus.Queued),
-            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5),
-            cancellationToken: cancellationToken
+            factory: _ => Task.FromResult(status),
+            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
+            cancellationToken: default
         );
 
         var result = new Dictionary<string, object>
@@ -180,7 +195,7 @@ internal sealed class AssetEndpoint : IEndpoint
             { "fileName", fileName }
         };
 
-        await scheduler.TriggerJob(JobContract.GenerateThumbnails, result, cancellationToken);
+        await scheduler.TriggerJob(nameof(GenerateThumbnailsJob), result, cancellationToken);
 
         return Results.Accepted(
             linkGenerator.GetPathByAction(
@@ -193,10 +208,54 @@ internal sealed class AssetEndpoint : IEndpoint
         );
     }
 
-    public static async Task<IResult> Import()
+    public static async Task<IResult> Import(
+        IFormFile file,
+        IMediator mediator,
+        IJobScheduler scheduler,
+        IDistributedCache cache,
+        IUserContext userContext,
+        LinkGenerator linkGenerator,
+        IHttpContextAccessor accessor,
+        CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
-        return Results.Ok();
+        if (accessor.HttpContext is null)
+            return Results.BadRequest("No HttpContext.");
+
+        var (id, fileName) = await mediator.SendCommandAsync<ImportAssetCommand, (DefaultIdType, string)>(new ImportAssetCommand(file), cancellationToken);
+
+        var result = new Dictionary<string, object>
+        {
+            { "id", id },
+            { "fileName", fileName },
+            { "tenantId", userContext.TenantId ?? string.Empty }
+        };
+
+        var status = new Dictionary<string, object>
+        {
+            ["status"] = ProcessingStatus.Queued,
+            ["processed"] = 0,
+            ["message"] = string.Empty,
+        };
+
+        await cache.SetAsync(
+            key: "status",
+            param: id,
+            factory: _ => Task.FromResult(status),
+            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
+            cancellationToken: default
+        );
+
+        await scheduler.TriggerJob(nameof(ImportAssetsJob), result, cancellationToken);
+
+        return Results.Accepted(
+            linkGenerator.GetPathByAction(
+               httpContext: accessor.HttpContext,
+               action: "status",
+               controller: "assets",
+               values: new { id }
+            ),
+            id
+        );
     }
 
     public static async Task<IResult> Export(
